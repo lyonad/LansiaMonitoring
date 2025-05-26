@@ -1,0 +1,167 @@
+LansiaMonitoring/
+├── backend/
+│   ├── config/
+│   │   ├── database.php
+│   │   ├── cors.php
+│   │   └── constants.php
+│   ├── database/
+│   │   ├── migrations/
+│   │   │   └── create_tables.sql
+│   │   └── seeders/
+│   │       └── sample_data.sql
+│   ├── src/
+│   │   ├── GraphQL/
+│   │   │   ├── Types/
+│   │   │   │   ├── PenggunaType.php
+│   │   │   │   ├── LansiaType.php
+│   │   │   │   ├── KeluargaType.php
+│   │   │   │   ├── TenagaMedisType.php
+│   │   │   │   ├── JadwalKonsumsiObatType.php
+│   │   │   │   ├── PemantauanKesehatanType.php
+│   │   │   │   ├── PengingatPerawatanType.php
+│   │   │   │   ├── KonsultasiType.php
+│   │   │   │   ├── LaporanKesehatanType.php
+│   │   │   │   ├── KontakDaruratType.php
+│   │   │   │   └── ForumDiskusiType.php
+│   │   │   ├── Mutations/
+│   │   │   │   ├── PenggunaMutation.php
+│   │   │   │   ├── LansiaMutation.php
+│   │   │   │   ├── KeluargaMutation.php
+│   │   │   │   ├── TenagaMedisMutation.php
+│   │   │   │   ├── JadwalKonsumsiObatMutation.php
+│   │   │   │   ├── PemantauanKesehatanMutation.php
+│   │   │   │   ├── PengingatPerawatanMutation.php
+│   │   │   │   ├── KonsultasiMutation.php
+│   │   │   │   ├── LaporanKesehatanMutation.php
+│   │   │   │   ├── KontakDaruratMutation.php
+│   │   │   │   └── ForumDiskusiMutation.php
+│   │   │   ├── Queries/
+│   │   │   │   ├── PenggunaQuery.php
+│   │   │   │   ├── LansiaQuery.php
+│   │   │   │   ├── KeluargaQuery.php
+│   │   │   │   ├── TenagaMedisQuery.php
+│   │   │   │   ├── JadwalKonsumsiObatQuery.php
+│   │   │   │   ├── PemantauanKesehatanQuery.php
+│   │   │   │   ├── PengingatPerawatanQuery.php
+│   │   │   │   ├── KonsultasiQuery.php
+│   │   │   │   ├── LaporanKesehatanQuery.php
+│   │   │   │   ├── KontakDaruratQuery.php
+│   │   │   │   └── ForumDiskusiQuery.php
+│   │   │   └── Schema.php
+│   │   ├── Models/
+│   │   │   ├── BaseModel.php
+│   │   │   ├── Pengguna.php
+│   │   │   ├── Lansia.php
+│   │   │   ├── Keluarga.php
+│   │   │   ├── TenagaMedis.php
+│   │   │   ├── JadwalKonsumsiObat.php
+│   │   │   ├── PemantauanKesehatan.php
+│   │   │   ├── PengingatPerawatan.php
+│   │   │   ├── Konsultasi.php
+│   │   │   ├── LaporanKesehatan.php
+│   │   │   ├── KontakDarurat.php
+│   │   │   └── ForumDiskusi.php
+│   │   ├── Services/
+│   │   │   ├── AuthService.php
+│   │   │   ├── NotificationService.php
+│   │   │   ├── ReportService.php
+│   │   │   └── ValidationService.php
+│   │   ├── Middleware/
+│   │   │   ├── AuthMiddleware.php
+│   │   │   ├── RoleMiddleware.php
+│   │   │   └── ValidationMiddleware.php
+│   │   └── Utils/
+│   │       ├── Database.php
+│   │       ├── Logger.php
+│   │       ├── Helper.php
+│   │       └── ResponseFormatter.php
+│   ├── vendor/ (Composer dependencies)
+│   ├── composer.json
+│   ├── composer.lock
+│   ├── .htaccess
+│   └── index.php
+├── frontend/
+│   ├── public/
+│   │   ├── css/
+│   │   │   ├── bootstrap.min.css
+│   │   │   ├── style.css
+│   │   │   ├── dashboard.css
+│   │   │   └── responsive.css
+│   │   ├── js/
+│   │   │   ├── bootstrap.bundle.min.js
+│   │   │   ├── chart.min.js
+│   │   │   ├── graphql-client.js
+│   │   │   ├── auth.js
+│   │   │   ├── dashboard.js
+│   │   │   ├── monitoring.js
+│   │   │   ├── medication.js
+│   │   │   ├── consultation.js
+│   │   │   └── reports.js
+│   │   ├── images/
+│   │   │   ├── logo.png
+│   │   │   ├── avatar-default.png
+│   │   │   └── icons/
+│   │   └── uploads/
+│   │       └── .gitkeep
+│   ├── pages/
+│   │   ├── auth/
+│   │   │   ├── login.html
+│   │   │   ├── register.html
+│   │   │   └── forgot-password.html
+│   │   ├── dashboard/
+│   │   │   ├── dashboard-lansia.html
+│   │   │   ├── dashboard-keluarga.html
+│   │   │   └── dashboard-medis.html
+│   │   ├── monitoring/
+│   │   │   ├── health-monitoring.html
+│   │   │   ├── medication-schedule.html
+│   │   │   └── care-reminders.html
+│   │   ├── consultation/
+│   │   │   ├── consultation-list.html
+│   │   │   ├── consultation-chat.html
+│   │   │   └── consultation-history.html
+│   │   ├── reports/
+│   │   │   ├── health-reports.html
+│   │   │   ├── medication-reports.html
+│   │   │   └── export-reports.html
+│   │   ├── profile/
+│   │   │   ├── profile-lansia.html
+│   │   │   ├── profile-keluarga.html
+│   │   │   └── profile-medis.html
+│   │   ├── forum/
+│   │   │   ├── forum-list.html
+│   │   │   ├── forum-detail.html
+│   │   │   └── create-topic.html
+│   │   └── emergency/
+│   │       ├── emergency-contacts.html
+│   │       └── emergency-alert.html
+│   ├── components/
+│   │   ├── header.html
+│   │   ├── sidebar.html
+│   │   ├── footer.html
+│   │   ├── modals/
+│   │   │   ├── add-medication.html
+│   │   │   ├── add-monitoring.html
+│   │   │   ├── add-reminder.html
+│   │   │   └── emergency-modal.html
+│   │   └── charts/
+│   │       ├── blood-pressure-chart.html
+│   │       ├── blood-sugar-chart.html
+│   │       └── medication-adherence-chart.html
+│   └── index.html
+├── docs/
+│   ├── api-documentation.md
+│   ├── database-schema.md
+│   ├── installation-guide.md
+│   ├── user-manual.md
+│   └── development-guide.md
+├── tests/
+│   ├── backend/
+│   │   ├── GraphQL/
+│   │   └── Models/
+│   └── frontend/
+│       └── js/
+├── .env.example
+├── .gitignore
+├── README.md
+└── docker-compose.yml (optional)
