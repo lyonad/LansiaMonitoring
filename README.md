@@ -1,3 +1,4 @@
-# GitTest
+# Lansia Monitoring
 Anggota Kelompok:
-Yumna
+Yumna / 
+Lyon Ambrosio Djuanda / 2304130098
