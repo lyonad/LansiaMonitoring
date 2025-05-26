@@ -1,167 +1,118 @@
 LansiaMonitoring/
 ├── backend/
 │   ├── config/
-│   │   ├── database.php
-│   │   ├── cors.php
-│   │   └── constants.php
-│   ├── database/
-│   │   ├── migrations/
-│   │   │   └── create_tables.sql
-│   │   └── seeders/
-│   │       └── sample_data.sql
-│   ├── src/
-│   │   ├── GraphQL/
-│   │   │   ├── Types/
-│   │   │   │   ├── PenggunaType.php
-│   │   │   │   ├── LansiaType.php
-│   │   │   │   ├── KeluargaType.php
-│   │   │   │   ├── TenagaMedisType.php
-│   │   │   │   ├── JadwalKonsumsiObatType.php
-│   │   │   │   ├── PemantauanKesehatanType.php
-│   │   │   │   ├── PengingatPerawatanType.php
-│   │   │   │   ├── KonsultasiType.php
-│   │   │   │   ├── LaporanKesehatanType.php
-│   │   │   │   ├── KontakDaruratType.php
-│   │   │   │   └── ForumDiskusiType.php
-│   │   │   ├── Mutations/
-│   │   │   │   ├── PenggunaMutation.php
-│   │   │   │   ├── LansiaMutation.php
-│   │   │   │   ├── KeluargaMutation.php
-│   │   │   │   ├── TenagaMedisMutation.php
-│   │   │   │   ├── JadwalKonsumsiObatMutation.php
-│   │   │   │   ├── PemantauanKesehatanMutation.php
-│   │   │   │   ├── PengingatPerawatanMutation.php
-│   │   │   │   ├── KonsultasiMutation.php
-│   │   │   │   ├── LaporanKesehatanMutation.php
-│   │   │   │   ├── KontakDaruratMutation.php
-│   │   │   │   └── ForumDiskusiMutation.php
-│   │   │   ├── Queries/
-│   │   │   │   ├── PenggunaQuery.php
-│   │   │   │   ├── LansiaQuery.php
-│   │   │   │   ├── KeluargaQuery.php
-│   │   │   │   ├── TenagaMedisQuery.php
-│   │   │   │   ├── JadwalKonsumsiObatQuery.php
-│   │   │   │   ├── PemantauanKesehatanQuery.php
-│   │   │   │   ├── PengingatPerawatanQuery.php
-│   │   │   │   ├── KonsultasiQuery.php
-│   │   │   │   ├── LaporanKesehatanQuery.php
-│   │   │   │   ├── KontakDaruratQuery.php
-│   │   │   │   └── ForumDiskusiQuery.php
-│   │   │   └── Schema.php
-│   │   ├── Models/
-│   │   │   ├── BaseModel.php
-│   │   │   ├── Pengguna.php
-│   │   │   ├── Lansia.php
-│   │   │   ├── Keluarga.php
-│   │   │   ├── TenagaMedis.php
-│   │   │   ├── JadwalKonsumsiObat.php
-│   │   │   ├── PemantauanKesehatan.php
-│   │   │   ├── PengingatPerawatan.php
-│   │   │   ├── Konsultasi.php
-│   │   │   ├── LaporanKesehatan.php
-│   │   │   ├── KontakDarurat.php
-│   │   │   └── ForumDiskusi.php
-│   │   ├── Services/
-│   │   │   ├── AuthService.php
-│   │   │   ├── NotificationService.php
-│   │   │   ├── ReportService.php
-│   │   │   └── ValidationService.php
-│   │   ├── Middleware/
-│   │   │   ├── AuthMiddleware.php
-│   │   │   ├── RoleMiddleware.php
-│   │   │   └── ValidationMiddleware.php
-│   │   └── Utils/
-│   │       ├── Database.php
-│   │       ├── Logger.php
-│   │       ├── Helper.php
-│   │       └── ResponseFormatter.php
-│   ├── vendor/ (Composer dependencies)
-│   ├── composer.json
-│   ├── composer.lock
-│   ├── .htaccess
-│   └── index.php
+│   │   ├── database.js          # Konfigurasi koneksi MySQL
+│   │   └── constants.js         # Konstanta aplikasi
+│   │
+│   ├── models/
+│   │   ├── pengguna.js
+│   │   ├── lansia.js
+│   │   ├── keluarga.js
+│   │   ├── tenagaMedis.js
+│   │   ├── jadwalKonsumsiObat.js
+│   │   ├── pemantauanKesehatan.js
+│   │   ├── pengingatPerawatan.js
+│   │   ├── konsultasi.js
+│   │   ├── laporanKesehatan.js
+│   │   ├── kontakDarurat.js
+│   │   └── forumDiskusi.js
+│   │
+│   ├── graphql/
+│   │   ├── schema/
+│   │   │   ├── index.js         # Gabungan semua schema
+│   │   │   ├── pengguna.js
+│   │   │   ├── lansia.js
+│   │   │   ├── keluarga.js
+│   │   │   ├── tenagaMedis.js
+│   │   │   ├── jadwalObat.js
+│   │   │   ├── pemantauan.js
+│   │   │   ├── pengingat.js
+│   │   │   ├── konsultasi.js
+│   │   │   ├── laporan.js
+│   │   │   ├── kontakDarurat.js
+│   │   │   └── forum.js
+│   │   │
+│   │   └── resolvers/
+│   │       ├── index.js         # Gabungan semua resolvers
+│   │       ├── pengguna.js
+│   │       ├── lansia.js
+│   │       ├── keluarga.js
+│   │       ├── tenagaMedis.js
+│   │       ├── jadwalObat.js
+│   │       ├── pemantauan.js
+│   │       ├── pengingat.js
+│   │       ├── konsultasi.js
+│   │       ├── laporan.js
+│   │       ├── kontakDarurat.js
+│   │       └── forum.js
+│   │
+│   ├── utils/
+│   │   ├── auth.js              # Autentikasi JWT
+│   │   ├── validators.js        # Validasi input
+│   │   └── helpers.js           # Fungsi helper
+│   │
+│   ├── middleware/
+│   │   └── auth.js              # Middleware autentikasi
+│   │
+│   ├── server.js                # Entry point server
+│   └── package.json
+│
 ├── frontend/
 │   ├── public/
+│   │   ├── index.html
 │   │   ├── css/
-│   │   │   ├── bootstrap.min.css
-│   │   │   ├── style.css
-│   │   │   ├── dashboard.css
-│   │   │   └── responsive.css
-│   │   ├── js/
-│   │   │   ├── bootstrap.bundle.min.js
-│   │   │   ├── chart.min.js
-│   │   │   ├── graphql-client.js
+│   │   │   └── style.css
+│   │   └── images/
+│   │
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Header.js
+│   │   │   │   ├── Footer.js
+│   │   │   │   ├── Sidebar.js
+│   │   │   │   └── Loading.js
+│   │   │   │
+│   │   │   ├── auth/
+│   │   │   │   ├── Login.js
+│   │   │   │   ├── Register.js
+│   │   │   │   └── Profile.js
+│   │   │   │
+│   │   │   ├── lansia/
+│   │   │   │   ├── LansiaList.js
+│   │   │   │   ├── LansiaDetail.js
+│   │   │   │   └── LansiaForm.js
+│   │   │   │
+│   │   │   ├── monitoring/
+│   │   │   │   ├── VitalSigns.js
+│   │   │   │   ├── MedicationSchedule.js
+│   │   │   │   └── HealthChart.js
+│   │   │   │
+│   │   │   ├── konsultasi/
+│   │   │   │   ├── ChatRoom.js
+│   │   │   │   ├── ConsultationList.js
+│   │   │   │   └── ConsultationForm.js
+│   │   │   │
+│   │   │   └── forum/
+│   │   │       ├── ForumList.js
+│   │   │       ├── TopicDetail.js
+│   │   │       └── CreateTopic.js
+│   │   │
+│   │   ├── services/
+│   │   │   ├── apollo.js        # Apollo Client setup
+│   │   │   ├── queries.js       # GraphQL queries
+│   │   │   └── mutations.js     # GraphQL mutations
+│   │   │
+│   │   ├── utils/
 │   │   │   ├── auth.js
-│   │   │   ├── dashboard.js
-│   │   │   ├── monitoring.js
-│   │   │   ├── medication.js
-│   │   │   ├── consultation.js
-│   │   │   └── reports.js
-│   │   ├── images/
-│   │   │   ├── logo.png
-│   │   │   ├── avatar-default.png
-│   │   │   └── icons/
-│   │   └── uploads/
-│   │       └── .gitkeep
-│   ├── pages/
-│   │   ├── auth/
-│   │   │   ├── login.html
-│   │   │   ├── register.html
-│   │   │   └── forgot-password.html
-│   │   ├── dashboard/
-│   │   │   ├── dashboard-lansia.html
-│   │   │   ├── dashboard-keluarga.html
-│   │   │   └── dashboard-medis.html
-│   │   ├── monitoring/
-│   │   │   ├── health-monitoring.html
-│   │   │   ├── medication-schedule.html
-│   │   │   └── care-reminders.html
-│   │   ├── consultation/
-│   │   │   ├── consultation-list.html
-│   │   │   ├── consultation-chat.html
-│   │   │   └── consultation-history.html
-│   │   ├── reports/
-│   │   │   ├── health-reports.html
-│   │   │   ├── medication-reports.html
-│   │   │   └── export-reports.html
-│   │   ├── profile/
-│   │   │   ├── profile-lansia.html
-│   │   │   ├── profile-keluarga.html
-│   │   │   └── profile-medis.html
-│   │   ├── forum/
-│   │   │   ├── forum-list.html
-│   │   │   ├── forum-detail.html
-│   │   │   └── create-topic.html
-│   │   └── emergency/
-│   │       ├── emergency-contacts.html
-│   │       └── emergency-alert.html
-│   ├── components/
-│   │   ├── header.html
-│   │   ├── sidebar.html
-│   │   ├── footer.html
-│   │   ├── modals/
-│   │   │   ├── add-medication.html
-│   │   │   ├── add-monitoring.html
-│   │   │   ├── add-reminder.html
-│   │   │   └── emergency-modal.html
-│   │   └── charts/
-│   │       ├── blood-pressure-chart.html
-│   │       ├── blood-sugar-chart.html
-│   │       └── medication-adherence-chart.html
-│   └── index.html
-├── docs/
-│   ├── api-documentation.md
-│   ├── database-schema.md
-│   ├── installation-guide.md
-│   ├── user-manual.md
-│   └── development-guide.md
-├── tests/
-│   ├── backend/
-│   │   ├── GraphQL/
-│   │   └── Models/
-│   └── frontend/
-│       └── js/
-├── .env.example
-├── .gitignore
-├── README.md
-└── docker-compose.yml (optional)
+│   │   │   └── helpers.js
+│   │   │
+│   │   ├── App.js
+│   │   └── index.js
+│   │
+│   └── package.json
+│
+├── database/
+│   ├── schema.sql               # Skema database MySQL
+│   └── seed.sql                 # Data awal untuk testing
+│
+└── README.md
