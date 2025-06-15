@@ -1,118 +1,35 @@
-LansiaMonitoring/
-├── backend/
-│   ├── config/
-│   │   ├── database.js          # Konfigurasi koneksi MySQL
-│   │   └── constants.js         # Konstanta aplikasi
-│   │
-│   ├── models/
-│   │   ├── pengguna.js
-│   │   ├── lansia.js
-│   │   ├── keluarga.js
-│   │   ├── tenagaMedis.js
-│   │   ├── jadwalKonsumsiObat.js
-│   │   ├── pemantauanKesehatan.js
-│   │   ├── pengingatPerawatan.js
-│   │   ├── konsultasi.js
-│   │   ├── laporanKesehatan.js
-│   │   ├── kontakDarurat.js
-│   │   └── forumDiskusi.js
-│   │
-│   ├── graphql/
-│   │   ├── schema/
-│   │   │   ├── index.js         # Gabungan semua schema
-│   │   │   ├── pengguna.js
-│   │   │   ├── lansia.js
-│   │   │   ├── keluarga.js
-│   │   │   ├── tenagaMedis.js
-│   │   │   ├── jadwalObat.js
-│   │   │   ├── pemantauan.js
-│   │   │   ├── pengingat.js
-│   │   │   ├── konsultasi.js
-│   │   │   ├── laporan.js
-│   │   │   ├── kontakDarurat.js
-│   │   │   └── forum.js
-│   │   │
-│   │   └── resolvers/
-│   │       ├── index.js         # Gabungan semua resolvers
-│   │       ├── pengguna.js
-│   │       ├── lansia.js
-│   │       ├── keluarga.js
-│   │       ├── tenagaMedis.js
-│   │       ├── jadwalObat.js
-│   │       ├── pemantauan.js
-│   │       ├── pengingat.js
-│   │       ├── konsultasi.js
-│   │       ├── laporan.js
-│   │       ├── kontakDarurat.js
-│   │       └── forum.js
-│   │
-│   ├── utils/
-│   │   ├── auth.js              # Autentikasi JWT
-│   │   ├── validators.js        # Validasi input
-│   │   └── helpers.js           # Fungsi helper
-│   │
-│   ├── middleware/
-│   │   └── auth.js              # Middleware autentikasi
-│   │
-│   ├── server.js                # Entry point server
-│   └── package.json
+lansiamonitoring/
 │
-├── frontend/
-│   ├── public/
-│   │   ├── index.html
-│   │   ├── css/
-│   │   │   └── style.css
-│   │   └── images/
+├── backend/                  # Folder untuk backend (API dan server)
+│   ├── config/               # Konfigurasi database dan pengaturan lainnya
+│   │   └── db.js             # Koneksi ke database MySQL
 │   │
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── common/
-│   │   │   │   ├── Header.js
-│   │   │   │   ├── Footer.js
-│   │   │   │   ├── Sidebar.js
-│   │   │   │   └── Loading.js
-│   │   │   │
-│   │   │   ├── auth/
-│   │   │   │   ├── Login.js
-│   │   │   │   ├── Register.js
-│   │   │   │   └── Profile.js
-│   │   │   │
-│   │   │   ├── lansia/
-│   │   │   │   ├── LansiaList.js
-│   │   │   │   ├── LansiaDetail.js
-│   │   │   │   └── LansiaForm.js
-│   │   │   │
-│   │   │   ├── monitoring/
-│   │   │   │   ├── VitalSigns.js
-│   │   │   │   ├── MedicationSchedule.js
-│   │   │   │   └── HealthChart.js
-│   │   │   │
-│   │   │   ├── konsultasi/
-│   │   │   │   ├── ChatRoom.js
-│   │   │   │   ├── ConsultationList.js
-│   │   │   │   └── ConsultationForm.js
-│   │   │   │
-│   │   │   └── forum/
-│   │   │       ├── ForumList.js
-│   │   │       ├── TopicDetail.js
-│   │   │       └── CreateTopic.js
-│   │   │
-│   │   ├── services/
-│   │   │   ├── apollo.js        # Apollo Client setup
-│   │   │   ├── queries.js       # GraphQL queries
-│   │   │   └── mutations.js     # GraphQL mutations
-│   │   │
-│   │   ├── utils/
-│   │   │   ├── auth.js
-│   │   │   └── helpers.js
-│   │   │
-│   │   ├── App.js
-│   │   └── index.js
+│   ├── models/               # Model-model untuk tabel database
+│   │   ├── pengguna.js       # Model pengguna
+│   │   ├── lansia.js         # Model lansia
+│   │   └── lainnya.js        # Model-model lain sesuai kebutuhan
 │   │
-│   └── package.json
+│   ├── resolvers/            # GraphQL resolvers untuk API
+│   │   ├── penggunaResolver.js
+│   │   ├── lansiaResolver.js
+│   │   └── lainnyaResolver.js
+│   │
+│   ├── schema/               # Skema GraphQL
+│   │   └── schema.js         # Mengatur query dan mutasi GraphQL
+│   │
+│   ├── server.js             # Server utama Express dan GraphQL
+│   └── package.json          # Dependensi backend
 │
-├── database/
-│   ├── schema.sql               # Skema database MySQL
-│   └── seed.sql                 # Data awal untuk testing
+├── frontend/                 # Folder untuk frontend (React)
+│   ├── public/               # Public assets seperti index.html
+│   ├── src/                  # Sumber kode React
+│   │   ├── components/       # Komponen-komponen UI
+│   │   ├── services/         # Layanan untuk interaksi dengan API (GraphQL)
+│   │   ├── App.js            # Komponen utama aplikasi
+│   │   ├── index.js          # Entry point React
+│   │   └── graphql/          # Menyimpan file query dan mutasi GraphQL
+│   │
+│   └── package.json          # Dependensi frontend
 │
-└── README.md
+├── README.md                 # Dokumentasi proyek
+└── .gitignore                # File untuk mengabaikan file-file tertentu pada git
