@@ -1,1 +1,0 @@
-// Lansia resolver 
