@@ -1,31 +1,60 @@
 LansiaMonitoring/
-│
-├── backend/                          # Folder untuk backend (API dan server)
-│   ├── config/                       # Konfigurasi database dan pengaturan lainnya
-│   │   └── db.py                     # Koneksi ke database MySQL
-│   ├── models/                       # Model-model untuk tabel database
-│   │   ├── pengguna.py               # Model pengguna
-│   │   ├── lansia.py                 # Model lansia
-│   │   ├── keluarga.py               # Model keluarga
-│   │   ├── tenaga_medis.py           # Model tenaga medis
-│   │   ├── jadwal_konsumsi_obat.py   # Model jadwal konsumsi obat
-│   │   ├── pemantauan_kesehatan.py   # Model pemantauan kesehatan
-│   │   ├── pengingat_perawatan.py    # Model pengingat perawatan
-│   │   ├── konsultasi.py             # Model konsultasi
-│   │   └── laporan_kesehatan.py      # Model laporan kesehatan
-│   ├── resolvers/                    # GraphQL resolvers untuk API
-│   │   ├── pengguna_resolver.py      # Resolver untuk pengguna
-│   │   ├── lansia_resolver.py        # Resolver untuk lansia
-│   │   ├── keluarga_resolver.py      # Resolver untuk keluarga
-│   │   └── konsultasi_resolver.py    # Resolver untuk konsultasi
-│   ├── schemas/                      # Skema GraphQL
-│   │   ├── pengguna_schema.py        # Skema untuk pengguna
-│   │   ├── lansia_schema.py          # Skema untuk lansia
-│   │   ├── keluarga_schema.py        # Skema untuk keluarga
-│   │   └── konsultasi_schema.py      # Skema untuk konsultasi
-│   ├── server.py                     # Server utama untuk menjalankan aplikasi
-├── frontend/                         # Folder untuk frontend menggunakan Streamlit
-│   ├── app.py                        # Streamlit app
-│   └── assets/                       # Folder untuk file statis (gambar, css, js, dll.)
-│
-└── requirements.txt                  # Daftar dependensi untuk backend dan frontend
+├── backend/
+│   ├── config/
+│   │   └── database.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── userController.js
+│   │   ├── medicineController.js
+│   │   ├── healthController.js
+│   │   ├── appointmentController.js
+│   │   ├── chatController.js
+│   │   └── reportController.js
+│   ├── middleware/
+│   │   └── auth.js
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Medicine.js
+│   │   ├── HealthRecord.js
+│   │   ├── Appointment.js
+│   │   ├── Chat.js
+│   │   └── EmergencyContact.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── users.js
+│   │   ├── medicines.js
+│   │   ├── health.js
+│   │   ├── appointments.js
+│   │   ├── chats.js
+│   │   └── reports.js
+│   ├── uploads/
+│   ├── app.js
+│   └── package.json
+├── frontend/
+│   ├── css/
+│   │   ├── style.css
+│   │   └── accessibility.css
+│   ├── js/
+│   │   ├── auth.js
+│   │   ├── dashboard.js
+│   │   ├── medicine.js
+│   │   ├── health.js
+│   │   ├── appointment.js
+│   │   ├── chat.js
+│   │   └── report.js
+│   ├── pages/
+│   │   ├── admin/
+│   │   │   ├── dashboard.html
+│   │   │   └── users.html
+│   │   ├── user/
+│   │   │   ├── dashboard.html
+│   │   │   ├── medicine.html
+│   │   │   ├── health.html
+│   │   │   ├── appointment.html
+│   │   │   ├── chat.html
+│   │   │   └── report.html
+│   │   └── forum.html
+│   ├── index.html
+│   └── login.html
+└── database/
+    └── lansia_monitoring.sql

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LansiaMonitoring</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/accessibility.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+    <!-- Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <span class="hamburger"></span>
+                </button>
+                <h1 class="header-title">LansiaMonitoring</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="notifications">
+                    <button class="notification-btn" aria-label="Notifications" onclick="toggleNotifications()">
+                        <span class="notification-icon">🔔</span>
+                        <span class="notification-badge" id="notificationBadge">3</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <h3>Notifikasi</h3>
+                        <div class="notification-list">
+                            <div class="notification-item unread">
+                                <span class="notification-time">10 menit lalu</span>
+                                <p>Waktunya minum obat: Amlodipine</p>
+                            </div>
+                            <div class="notification-item unread">
+                                <span class="notification-time">1 jam lalu</span>
+                                <p>Jadwal checkup dengan Dr. Siti besok pukul 10:00</p>
+                            </div>
+                            <div class="notification-item">
+                                <span class="notification-time">2 jam lalu</span>
+                                <p>Hasil tes darah sudah tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" onclick="toggleUserMenu()">
+                        <img src="../../images/default-avatar.svg" alt="User avatar" class="user-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlMGUwZTAiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjM1IiByPSIyMCIgZmlsbD0iIzk5OSIvPgogIDxlbGxpcHNlIGN4PSI1MCIgY3k9IjgwIiByeD0iMzUiIHJ5PSIyNSIgZmlsbD0iIzk5OSIvPgo8L3N2Zz4='">
+                        <span class="user-name" id="userName">Loading...</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">👤 Profil Saya</a>
+                        <a href="settings.html" class="dropdown-item">⚙️ Pengaturan</a>
+                        <button onclick="logout()" class="dropdown-item logout-btn">🚪 Keluar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="medicine.html" class="nav-link">
+                    <span class="nav-icon">💊</span>
+                    <span class="nav-text">Obat-obatan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="health.html" class="nav-link">
+                    <span class="nav-icon">❤️</span>
+                    <span class="nav-text">Kesehatan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appointment.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">Jadwal</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="chat.html" class="nav-link">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-text">Konsultasi</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="report.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Laporan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="../forum.html" class="nav-link">
+                    <span class="nav-icon">🗣️</span>
+                    <span class="nav-text">Forum</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="emergency-contacts">
+                <h4>Kontak Darurat</h4>
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <div class="contact-info">
+                        <p class="contact-name">Anak - Budi</p>
+                        <p class="contact-phone">0812-3456-7890</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <div class="contact-info">
+                        <p class="contact-name">RS Harapan</p>
+                        <p class="contact-phone">021-1234567</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="dashboard-header">
+            <h2>Selamat Datang, <span id="userFullName">Loading...</span>!</h2>
+            <p class="date-today" id="dateToday"></p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon health">❤️</div>
+                <div class="stat-content">
+                    <h3>Tekanan Darah</h3>
+                    <p class="stat-value">120/80</p>
+                    <p class="stat-label">mmHg - Normal</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon sugar">🩸</div>
+                <div class="stat-content">
+                    <h3>Gula Darah</h3>
+                    <p class="stat-value">105</p>
+                    <p class="stat-label">mg/dL - Normal</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon medicine">💊</div>
+                <div class="stat-content">
+                    <h3>Obat Hari Ini</h3>
+                    <p class="stat-value">3/5</p>
+                    <p class="stat-label">Sudah diminum</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon appointment">📅</div>
+                <div class="stat-content">
+                    <h3>Jadwal Berikutnya</h3>
+                    <p class="stat-value">Besok</p>
+                    <p class="stat-label">10:00 - Dr. Siti</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="dashboard-section">
+            <h3 class="section-title">Jadwal Hari Ini</h3>
+            <div class="schedule-list">
+                <div class="schedule-item completed">
+                    <div class="schedule-time">08:00</div>
+                    <div class="schedule-content">
+                        <h4>Minum Obat - Amlodipine</h4>
+                        <p>Sudah diminum ✓</p>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="schedule-time">12:00</div>
+                    <div class="schedule-content">
+                        <h4>Minum Obat - Metformin</h4>
+                        <p>Belum diminum</p>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="schedule-time">14:00</div>
+                    <div class="schedule-content">
+                        <h4>Cek Tekanan Darah</h4>
+                        <p>Pengingat aktif</p>
+                    </div>
+                </div>
+                <div class="schedule-item">
+                    <div class="schedule-time">20:00</div>
+                    <div class="schedule-content">
+                        <h4>Minum Obat - Simvastatin</h4>
+                        <p>Belum diminum</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Chart -->
+        <div class="dashboard-section">
+            <h3 class="section-title">Grafik Kesehatan Minggu Ini</h3>
+            <div class="chart-container">
+                <canvas id="healthChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section">
+            <h3 class="section-title">Aksi Cepat</h3>
+            <div class="action-grid">
+                <button class="action-card" onclick="location.href='health.html#add-record'">
+                    <span class="action-icon">➕</span>
+                    <span class="action-text">Catat Kesehatan</span>
+                </button>
+                <button class="action-card" onclick="location.href='medicine.html#log'">
+                    <span class="action-icon">✅</span>
+                    <span class="action-text">Konfirmasi Obat</span>
+                </button>
+                <button class="action-card" onclick="location.href='chat.html'">
+                    <span class="action-icon">💬</span>
+                    <span class="action-text">Chat Dokter</span>
+                </button>
+                <button class="action-card" onclick="location.href='report.html#generate'">
+                    <span class="action-icon">📄</span>
+                    <span class="action-text">Buat Laporan</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Accessibility Controls -->
+    <div class="accessibility-floating">
+        <button class="accessibility-toggle" onclick="toggleAccessibilityMenu()" aria-label="Accessibility options">
+            ♿
+        </button>
+        <div class="accessibility-menu" id="accessibilityMenu">
+            <button onclick="increaseFontSize()">A+</button>
+            <button onclick="decreaseFontSize()">A-</button>
+            <button onclick="toggleHighContrast()">⚫⚪</button>
+            <button onclick="toggleDyslexiaFont()">Dys</button>
+        </div>
+    </div>
+
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!window.auth.isAuthenticated()) {
+                window.location.href = '../../login.html';
+                return;
+            }
+
+            // Load user data
+            const user = window.auth.getUser();
+            document.getElementById('userName').textContent = user.full_name || user.username;
+            document.getElementById('userFullName').textContent = user.full_name || user.username;
+
+            // Set today's date
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('dateToday').textContent = today.toLocaleDateString('id-ID', options);
+
+            // Initialize health chart
+            initializeHealthChart();
+
+            // Load dashboard data
+            loadDashboardData();
+        });
+
+        // Menu toggles
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.main-content').classList.toggle('sidebar-active');
+        });
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        function toggleAccessibilityMenu() {
+            const menu = document.getElementById('accessibilityMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.notifications')) {
+                document.getElementById('notificationDropdown').classList.remove('active');
+            }
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown').classList.remove('active');
+            }
+            if (!e.target.closest('.accessibility-floating')) {
+                document.getElementById('accessibilityMenu').classList.remove('active');
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                try {
+                    // Clear local storage
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    
+                    // Redirect to login page
+                    window.location.href = '../../login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Force redirect even if error
+                    window.location.href = '../../login.html';
+                }
+            }
+        }
+
+        // Initialize health chart
+        function initializeHealthChart() {
+            const ctx = document.getElementById('healthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    datasets: [{
+                        label: 'Tekanan Darah Sistolik',
+                        data: [120, 118, 122, 119, 121, 120, 119],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }, {
+                        label: 'Tekanan Darah Diastolik',
+                        data: [80, 78, 82, 79, 81, 80, 79],
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.1
+                    }, {
+                        label: 'Gula Darah',
+                        data: [105, 110, 108, 112, 106, 109, 107],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // This would normally fetch from API
+                // const data = await window.auth.apiRequest('/dashboard');
+                console.log('Loading dashboard data...');
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+    </script>
+</body>
+</html>

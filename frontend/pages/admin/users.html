@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen User - LansiaMonitoring Admin</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/accessibility.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+    <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+<script>
+// EMERGENCY GLOBAL FUNCTIONS - Must be available immediately
+function showAddUserModal() {
+    const modal = document.getElementById('addUserModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error('Modal addUserModal not found');
+    }
+}
+
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('active');
+    } else {
+        console.error('Dropdown userDropdown not found');
+    }
+}
+
+function toggleNotifications() {
+    const dropdown = document.getElementById('notificationDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('active');
+    } else {
+        console.error('Dropdown notificationDropdown not found');
+    }
+}
+
+function filterUsers() {
+    // Will be overridden later when main script loads
+    console.log('Filter users called');
+    if (window.loadUsers) {
+        window.loadUsers(1);
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        const form = modal.querySelector('form');
+        if (form) form.reset();
+    }
+}
+
+function logout() {
+    if (confirm('Apakah Anda yakin ingin keluar?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '../../login.html';
+    }
+}
+
+// Placeholder functions that will be overridden
+function editUser(id) {
+    console.log('Edit user:', id);
+}
+
+function deleteUser(id, username) {
+    console.log('Delete user:', id, username);
+}
+
+function resetPassword(id, username) {
+    console.log('Reset password for:', username);
+}
+
+console.log('Emergency functions loaded');
+</script>
+
+<!-- Rest of your HTML content continues here -->
+<!-- Skip to main content -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <span class="hamburger"></span>
+                </button>
+                <h1 class="header-title">LansiaMonitoring - Admin</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="notifications">
+                    <button class="notification-btn" aria-label="Notifications" onclick="toggleNotifications()">
+                        <span class="notification-icon">🔔</span>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <h3>Notifikasi</h3>
+                        <div class="notification-list">
+                            <p class="no-notifications">Tidak ada notifikasi</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" onclick="toggleUserMenu()">
+                        <img src="../../images/default-avatar.svg" alt="User avatar" class="user-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlMGUwZTAiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjM1IiByPSIyMCIgZmlsbD0iIzk5OSIvPgogIDxlbGxpcHNlIGN4PSI1MCIgY3k9IjgwIiByeD0iMzUiIHJ5PSIyNSIgZmlsbD0iIzk5OSIvPgo8L3N2Zz4='">
+                        <span class="user-name" id="userName">Admin</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">👤 Profil Saya</a>
+                        <a href="settings.html" class="dropdown-item">⚙️ Pengaturan</a>
+                        <button onclick="logout()" class="dropdown-item logout-btn">🚪 Keluar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="users.html" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Manajemen User</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="monitoring.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Monitoring</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reports.html" class="nav-link">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Laporan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="medicines.html" class="nav-link">
+                    <span class="nav-icon">💊</span>
+                    <span class="nav-text">Data Obat</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appointments.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">Jadwal</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forum-moderation.html" class="nav-link">
+                    <span class="nav-icon">🗣️</span>
+                    <span class="nav-text">Moderasi Forum</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="system-logs.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Log Sistem</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Pengaturan</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="dashboard-header">
+            <h2>Manajemen User</h2>
+            <button class="btn btn-primary" onclick="showAddUserModal()">
+                ➕ Tambah User Baru
+            </button>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="dashboard-section">
+            <div class="filter-bar">
+                <input type="text" id="searchInput" placeholder="Cari user..." class="form-input" style="max-width: 300px;">
+                <select id="roleFilter" class="form-input" style="max-width: 200px;">
+                    <option value="">Semua Role</option>
+                    <option value="admin">Admin</option>
+                    <option value="family">Keluarga</option>
+                    <option value="elderly">Lansia</option>
+                    <option value="medical">Tenaga Medis</option>
+                </select>
+                <button class="btn btn-secondary" onclick="filterUsers()">Filter</button>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="dashboard-section">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Nama Lengkap</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Tanggal Daftar</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </main>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tambah User Baru</h3>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <form id="addUserForm" class="modal-body">
+                <div class="form-group">
+                    <label for="newUsername" class="form-label">Username</label>
+                    <input type="text" id="newUsername" name="username" class="form-input" required>
+                    <span class="error-message" id="newUsername-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword" class="form-label">Password</label>
+                    <input type="password" id="newPassword" name="password" class="form-input" required>
+                    <span class="error-message" id="newPassword-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="newEmail" class="form-label">Email</label>
+                    <input type="email" id="newEmail" name="email" class="form-input" required>
+                    <span class="error-message" id="newEmail-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="newFullName" class="form-label">Nama Lengkap</label>
+                    <input type="text" id="newFullName" name="fullName" class="form-input" required>
+                    <span class="error-message" id="newFullName-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="newRole" class="form-label">Role</label>
+                    <select id="newRole" name="role" class="form-input" required>
+                        <option value="">Pilih Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="family">Keluarga</option>
+                        <option value="elderly">Lansia</option>
+                        <option value="medical">Tenaga Medis</option>
+                    </select>
+                    <span class="error-message" id="newRole-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="newPhone" class="form-label">No. Telepon</label>
+                    <input type="tel" id="newPhone" name="phone" class="form-input">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addUserModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <form id="editUserForm" class="modal-body">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editUsername" class="form-label">Username</label>
+                    <input type="text" id="editUsername" name="username" class="form-input">
+                    <span class="error-message" id="editUsername-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail" class="form-label">Email</label>
+                    <input type="email" id="editEmail" name="email" class="form-input">
+                    <span class="error-message" id="editEmail-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="editFullName" class="form-label">Nama Lengkap</label>
+                    <input type="text" id="editFullName" name="fullName" class="form-input">
+                    <span class="error-message" id="editFullName-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="editRole" class="form-label">Role</label>
+                    <select id="editRole" name="role" class="form-input">
+                        <option value="admin">Admin</option>
+                        <option value="family">Keluarga</option>
+                        <option value="elderly">Lansia</option>
+                        <option value="medical">Tenaga Medis</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone" class="form-label">No. Telepon</label>
+                    <input type="tel" id="editPhone" name="phone" class="form-input">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Reset Password</h3>
+                <button class="modal-close" onclick="closeModal('resetPasswordModal')">&times;</button>
+            </div>
+            <form id="resetPasswordForm" class="modal-body">
+                <input type="hidden" id="resetUserId">
+                <p>Reset password untuk user: <strong id="resetUsername"></strong></p>
+                <div class="form-group">
+                    <label for="resetNewPassword" class="form-label">Password Baru</label>
+                    <input type="password" id="resetNewPassword" name="newPassword" class="form-input" required>
+                    <span class="error-message" id="resetNewPassword-error"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('resetPasswordModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display: none;">
+        <span id="toastMessage"></span>
+    </div>
+
+    <style>
+        /* Additional styles for users page */
+        .filter-bar {
+            display: flex;
+            gap: var(--spacing-medium);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background-color: var(--dark-gray);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--black);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: var(--border-radius-large);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-large);
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .modal-body {
+            padding: var(--spacing-large);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: var(--spacing-medium);
+            justify-content: flex-end;
+            padding: var(--spacing-large);
+            border-top: 1px solid var(--gray);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        .pagination {
+            display: flex;
+            gap: var(--spacing-small);
+            justify-content: center;
+            margin-top: var(--spacing-large);
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid var(--gray);
+            background: var(--white);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .pagination button.active {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-small);
+        }
+
+        .btn-small {
+            padding: 4px 12px;
+            font-size: var(--font-size-small);
+        }
+
+        .btn-edit {
+            background-color: var(--warning-color);
+            color: var(--white);
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: var(--white);
+        }
+
+        .btn-reset {
+            background-color: var(--info-color);
+            color: var(--white);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .badge-admin {
+            background-color: var(--danger-color);
+            color: var(--white);
+        }
+
+        .badge-family {
+            background-color: var(--info-color);
+            color: var(--white);
+        }
+
+        .badge-elderly {
+            background-color: var(--success-color);
+            color: var(--white);
+        }
+
+        .badge-medical {
+            background-color: var(--warning-color);
+            color: var(--white);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: var(--white);
+            padding: 16px 24px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.error {
+            background-color: var(--danger-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script src="../../js/auth.js"></script>
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:3000/api';
+        let currentPage = 1;
+        const limit = 10;
+
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.auth.isAuthenticated()) {
+                window.location.href = '../../login.html';
+                return;
+            }
+
+            const user = window.auth.getUser();
+            if (user.role !== 'admin') {
+                window.location.href = '../user/dashboard.html';
+                return;
+            }
+
+            document.getElementById('userName').textContent = user.full_name || user.username;
+            
+            loadUsers();
+        });
+
+        // Menu toggles
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.main-content').classList.toggle('sidebar-active');
+        });
+
+        function toggleNotifications() {
+            document.getElementById('notificationDropdown').classList.toggle('active');
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.notifications')) {
+                document.getElementById('notificationDropdown').classList.remove('active');
+            }
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown').classList.remove('active');
+            }
+        });
+
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '../../login.html';
+            }
+        }
+
+        // Load users from API
+        async function loadUsers(page = 1) {
+            try {
+                const search = document.getElementById('searchInput').value;
+                const role = document.getElementById('roleFilter').value;
+                
+                const queryParams = new URLSearchParams({
+                    page: page,
+                    limit: limit,
+                    search: search,
+                    role: role
+                });
+
+                const response = await window.auth.apiRequest(`/users?${queryParams}`);
+                
+                if (response.success) {
+                    displayUsers(response.data.users);
+                    displayPagination(response.data.pagination);
+                } else {
+                    showToast('Gagal memuat data users', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showToast('Gagal memuat data users', 'error');
+            }
+        }
+
+        // Display users in table
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data user</td></tr>';
+                return;
+            }
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.full_name}</td>
+                    <td>${user.email}</td>
+                    <td><span class="badge badge-${user.role}">${getRoleName(user.role)}</span></td>
+                    <td>${new Date(user.created_at).toLocaleDateString('id-ID')}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-small btn-edit" onclick="editUser(${user.id})" title="Edit">✏️</button>
+                            <button class="btn btn-small btn-reset" onclick="resetPassword(${user.id}, '${user.username}')" title="Reset Password">🔑</button>
+                            <button class="btn btn-small btn-delete" onclick="deleteUser(${user.id}, '${user.username}')" title="Hapus">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Display pagination
+        function displayPagination(pagination) {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '← Previous';
+            prevBtn.disabled = pagination.page === 1;
+            prevBtn.onclick = () => loadUsers(pagination.page - 1);
+            paginationDiv.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.textContent = i;
+                    pageBtn.className = i === pagination.page ? 'active' : '';
+                    pageBtn.onclick = () => loadUsers(i);
+                    paginationDiv.appendChild(pageBtn);
+                } else if (i === pagination.page - 3 || i === pagination.page + 3) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.style.padding = '0 8px';
+                    paginationDiv.appendChild(dots);
+                }
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Next →';
+            nextBtn.disabled = pagination.page === pagination.totalPages;
+            nextBtn.onclick = () => loadUsers(pagination.page + 1);
+            paginationDiv.appendChild(nextBtn);
+
+            currentPage = pagination.page;
+        }
+
+        function getRoleName(role) {
+            const roles = {
+                admin: 'Admin',
+                family: 'Keluarga',
+                elderly: 'Lansia',
+                medical: 'Tenaga Medis'
+            };
+            return roles[role] || role;
+        }
+
+        // Filter users
+        function filterUsers() {
+            loadUsers(1);
+        }
+
+        // Add event listeners for real-time search
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                filterUsers();
+            }
+        });
+
+        document.getElementById('roleFilter').addEventListener('change', filterUsers);
+
+        // Modal functions
+        function showAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.getElementById(modalId).querySelector('form').reset();
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        }
+
+        // Add user form submission
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const formData = {
+                username: document.getElementById('newUsername').value,
+                password: document.getElementById('newPassword').value,
+                email: document.getElementById('newEmail').value,
+                fullName: document.getElementById('newFullName').value,
+                role: document.getElementById('newRole').value,
+                phone: document.getElementById('newPhone').value
+            };
+
+            try {
+                const response = await window.auth.apiRequest('/users', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.success) {
+                    showToast('User berhasil ditambahkan');
+                    closeModal('addUserModal');
+                    loadUsers(currentPage);
+                } else {
+                    if (response.errors) {
+                        response.errors.forEach(error => {
+                            const field = error.path || error.param;
+                            const errorEl = document.getElementById(`new${field.charAt(0).toUpperCase() + field.slice(1)}-error`);
+                            if (errorEl) {
+                                errorEl.textContent = error.msg || error.message;
+                            }
+                        });
+                    } else {
+                        showToast(response.message || 'Gagal menambahkan user', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error adding user:', error);
+                showToast('Gagal menambahkan user', 'error');
+            }
+        });
+
+        // Edit user
+        async function editUser(userId) {
+            try {
+                const response = await window.auth.apiRequest(`/users/${userId}`);
+                if (response.success) {
+                    const user = response.data;
+                    document.getElementById('editUserId').value = user.id;
+                    document.getElementById('editUsername').value = user.username;
+                    document.getElementById('editEmail').value = user.email;
+                    document.getElementById('editFullName').value = user.full_name;
+                    document.getElementById('editRole').value = user.role;
+                    document.getElementById('editPhone').value = user.phone || '';
+                    
+                    document.getElementById('editUserModal').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error fetching user:', error);
+                showToast('Gagal memuat data user', 'error');
+            }
+        }
+
+        // Edit user form submission
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const userId = document.getElementById('editUserId').value;
+            const formData = {
+                username: document.getElementById('editUsername').value,
+                email: document.getElementById('editEmail').value,
+                fullName: document.getElementById('editFullName').value,
+                role: document.getElementById('editRole').value,
+                phone: document.getElementById('editPhone').value
+            };
+
+            try {
+                const response = await window.auth.apiRequest(`/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.success) {
+                    showToast('User berhasil diupdate');
+                    closeModal('editUserModal');
+                    loadUsers(currentPage);
+                } else {
+                    showToast(response.message || 'Gagal mengupdate user', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                showToast('Gagal mengupdate user', 'error');
+            }
+        });
+
+        // Delete user
+        async function deleteUser(userId, username) {
+            if (confirm(`Yakin ingin menghapus user "${username}"?\n\nSemua data terkait user ini akan ikut terhapus.`)) {
+                try {
+                    const response = await window.auth.apiRequest(`/users/${userId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.success) {
+                        showToast('User berhasil dihapus');
+                        loadUsers(currentPage);
+                    } else {
+                        showToast(response.message || 'Gagal menghapus user', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    showToast('Gagal menghapus user', 'error');
+                }
+            }
+        }
+
+        // Reset password
+        function resetPassword(userId, username) {
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('resetUsername').textContent = username;
+            document.getElementById('resetPasswordModal').style.display = 'flex';
+        }
+
+        // Reset password form submission
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const userId = document.getElementById('resetUserId').value;
+            const newPassword = document.getElementById('resetNewPassword').value;
+
+            if (newPassword.length < 6) {
+                document.getElementById('resetNewPassword-error').textContent = 'Password minimal 6 karakter';
+                return;
+            }
+
+            try {
+                const response = await window.auth.apiRequest(`/users/${userId}/reset-password`, {
+                    method: 'POST',
+                    body: JSON.stringify({ newPassword })
+                });
+
+                if (response.success) {
+                    showToast('Password berhasil direset');
+                    closeModal('resetPasswordModal');
+                } else {
+                    showToast(response.message || 'Gagal reset password', 'error');
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                showToast('Gagal reset password', 'error');
+            }
+        });
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toastMessage.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

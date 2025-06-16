@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LansiaMonitoring</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/accessibility.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+    <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+    <!-- Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <span class="hamburger"></span>
+                </button>
+                <h1 class="header-title">LansiaMonitoring - Admin</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="notifications">
+                    <button class="notification-btn" aria-label="Notifications" onclick="toggleNotifications()">
+                        <span class="notification-icon">🔔</span>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <h3>Notifikasi</h3>
+                        <div class="notification-list">
+                            <p class="no-notifications">Tidak ada notifikasi</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" onclick="toggleUserMenu()">
+                        <img src="../../images/default-avatar.svg" alt="User avatar" class="user-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlMGUwZTAiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjM1IiByPSIyMCIgZmlsbD0iIzk5OSIvPgogIDxlbGxpcHNlIGN4PSI1MCIgY3k9IjgwIiByeD0iMzUiIHJ5PSIyNSIgZmlsbD0iIzk5OSIvPgo8L3N2Zz4='">
+                        <span class="user-name" id="userName">Admin</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">👤 Profil Saya</a>
+                        <a href="settings.html" class="dropdown-item">⚙️ Pengaturan</a>
+                        <button onclick="logout()" class="dropdown-item logout-btn">🚪 Keluar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="users.html" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Manajemen User</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="monitoring.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Monitoring</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reports.html" class="nav-link">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Laporan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="medicines.html" class="nav-link">
+                    <span class="nav-icon">💊</span>
+                    <span class="nav-text">Data Obat</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appointments.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">Jadwal</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forum-moderation.html" class="nav-link">
+                    <span class="nav-icon">🗣️</span>
+                    <span class="nav-text">Moderasi Forum</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="system-logs.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Log Sistem</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Pengaturan</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="dashboard-header">
+            <h2>Dashboard Administrator</h2>
+            <p class="date-today" id="dateToday"></p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users">👥</div>
+                <div class="stat-content">
+                    <h3>Total Users</h3>
+                    <p class="stat-value" id="totalUsers">0</p>
+                    <p class="stat-label">Pengguna Terdaftar</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon elderly">👴</div>
+                <div class="stat-content">
+                    <h3>Total Lansia</h3>
+                    <p class="stat-value" id="totalElderly">0</p>
+                    <p class="stat-label">Lansia Terdaftar</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon active">✅</div>
+                <div class="stat-content">
+                    <h3>User Aktif</h3>
+                    <p class="stat-value" id="activeUsers">0</p>
+                    <p class="stat-label">Aktif Hari Ini</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon alerts">⚠️</div>
+                <div class="stat-content">
+                    <h3>Alert Kesehatan</h3>
+                    <p class="stat-value" id="healthAlerts">0</p>
+                    <p class="stat-label">Perlu Perhatian</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Overview -->
+        <div class="dashboard-grid">
+            <!-- Recent Activities -->
+            <div class="dashboard-section">
+                <h3 class="section-title">Aktivitas Terbaru</h3>
+                <div class="activity-list" id="recentActivities">
+                    <div class="activity-item">
+                        <span class="activity-time">Memuat...</span>
+                        <p>Memuat aktivitas terbaru...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="dashboard-section">
+                <h3 class="section-title">Status Sistem</h3>
+                <div class="system-status">
+                    <div class="status-item">
+                        <span class="status-indicator active"></span>
+                        <span class="status-label">Database</span>
+                        <span class="status-value">Aktif</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-indicator active"></span>
+                        <span class="status-label">API Server</span>
+                        <span class="status-value">Aktif</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-indicator active"></span>
+                        <span class="status-label">Notifikasi</span>
+                        <span class="status-value">Aktif</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-indicator warning"></span>
+                        <span class="status-label">Email Service</span>
+                        <span class="status-value">Belum Dikonfigurasi</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="dashboard-grid">
+            <!-- User Registration Chart -->
+            <div class="dashboard-section">
+                <h3 class="section-title">Registrasi User (7 Hari Terakhir)</h3>
+                <div class="chart-container">
+                    <canvas id="registrationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- User Role Distribution -->
+            <div class="dashboard-section">
+                <h3 class="section-title">Distribusi Role User</h3>
+                <div class="chart-container">
+                    <canvas id="roleChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section">
+            <h3 class="section-title">Aksi Cepat</h3>
+            <div class="action-grid">
+                <button class="action-card" onclick="location.href='users.html#add'">
+                    <span class="action-icon">➕</span>
+                    <span class="action-text">Tambah User</span>
+                </button>
+                <button class="action-card" onclick="location.href='reports.html#generate'">
+                    <span class="action-icon">📊</span>
+                    <span class="action-text">Generate Laporan</span>
+                </button>
+                <button class="action-card" onclick="location.href='system-logs.html'">
+                    <span class="action-icon">📋</span>
+                    <span class="action-text">Lihat Log</span>
+                </button>
+                <button class="action-card" onclick="location.href='settings.html'">
+                    <span class="action-icon">⚙️</span>
+                    <span class="action-text">Pengaturan</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.auth.isAuthenticated()) {
+                window.location.href = '../../login.html';
+                return;
+            }
+
+            const user = window.auth.getUser();
+            if (user.role !== 'admin') {
+                window.location.href = '../user/dashboard.html';
+                return;
+            }
+
+            // Set user info
+            document.getElementById('userName').textContent = user.full_name || user.username;
+
+            // Set date
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('dateToday').textContent = today.toLocaleDateString('id-ID', options);
+
+            // Load dashboard data
+            loadAdminDashboard();
+        });
+
+        // Menu toggles
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.main-content').classList.toggle('sidebar-active');
+        });
+
+        function toggleNotifications() {
+            document.getElementById('notificationDropdown').classList.toggle('active');
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('active');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.notifications')) {
+                document.getElementById('notificationDropdown').classList.remove('active');
+            }
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown').classList.remove('active');
+            }
+        });
+
+        // Logout
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                try {
+                    // Clear local storage
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    
+                    // Redirect to login page
+                    window.location.href = '../../login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Force redirect even if error
+                    window.location.href = '../../login.html';
+                }
+            }
+        }
+
+        // Load admin dashboard data
+        async function loadAdminDashboard() {
+            try {
+                // Load stats
+                await loadStatistics();
+                
+                // Load recent activities
+                await loadRecentActivities();
+                
+                // Initialize charts
+                initializeCharts();
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const stats = await window.auth.apiRequest('/users/statistics');
+                
+                if (stats.success) {
+                    document.getElementById('totalUsers').textContent = stats.data.totalUsers;
+                    document.getElementById('activeUsers').textContent = stats.data.activeToday;
+                    
+                    // Count elderly users from role distribution
+                    const elderlyCount = stats.data.roleDistribution.find(r => r.role === 'elderly')?.count || 0;
+                    document.getElementById('totalElderly').textContent = elderlyCount;
+                    
+                    // For health alerts, we'll use a placeholder
+                    document.getElementById('healthAlerts').textContent = '3';
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                // Use fallback values
+                document.getElementById('totalUsers').textContent = '-';
+                document.getElementById('totalElderly').textContent = '-';
+                document.getElementById('activeUsers').textContent = '-';
+                document.getElementById('healthAlerts').textContent = '-';
+            }
+        }
+
+        // Load recent activities
+        async function loadRecentActivities() {
+            try {
+                // This would normally fetch from API
+                // const activities = await window.auth.apiRequest('/admin/activities');
+                
+                // For now, show dummy activities
+                const activities = [
+                    { time: '10 menit lalu', action: 'User baru terdaftar: keluarga2' },
+                    { time: '30 menit lalu', action: 'Login: dokter1' },
+                    { time: '1 jam lalu', action: 'Update profil: lansia1' },
+                    { time: '2 jam lalu', action: 'Laporan kesehatan dibuat untuk: lansia3' },
+                    { time: '3 jam lalu', action: 'Konsultasi chat dimulai: dokter1 dengan lansia2' }
+                ];
+                
+                const activityList = document.getElementById('recentActivities');
+                activityList.innerHTML = '';
+                
+                activities.forEach(activity => {
+                    const item = document.createElement('div');
+                    item.className = 'activity-item';
+                    item.innerHTML = `
+                        <span class="activity-time">${activity.time}</span>
+                        <p>${activity.action}</p>
+                    `;
+                    activityList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading activities:', error);
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Registration Chart
+            const regCtx = document.getElementById('registrationChart').getContext('2d');
+            new Chart(regCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    datasets: [{
+                        label: 'Registrasi User',
+                        data: [5, 8, 6, 12, 9, 15, 11],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Role Distribution Chart
+            const roleCtx = document.getElementById('roleChart').getContext('2d');
+            new Chart(roleCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Lansia', 'Keluarga', 'Tenaga Medis', 'Admin'],
+                    datasets: [{
+                        data: [89, 52, 12, 3],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+</body>
+</html>

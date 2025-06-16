@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LansiaMonitoring</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo-section">
+                <div class="logo-placeholder" style="width: 80px; height: 80px; margin: 0 auto var(--spacing-medium); background-color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: white; font-size: 2rem; font-weight: bold;">LM</span>
+                </div>
+                <h1>LansiaMonitoring</h1>
+                <p class="tagline">Sistem Monitoring Kesehatan Lansia</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <h2>Masuk ke Akun Anda</h2>
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Username atau Email</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-input" 
+                        required 
+                        autocomplete="username"
+                        aria-required="true"
+                        aria-describedby="username-error"
+                    >
+                    <span id="username-error" class="error-message" role="alert"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="password-input-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            required 
+                            autocomplete="current-password"
+                            aria-required="true"
+                            aria-describedby="password-error"
+                        >
+                        <button 
+                            type="button" 
+                            class="toggle-password" 
+                            aria-label="Tampilkan password"
+                            onclick="togglePassword()"
+                        >
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                    <span id="password-error" class="error-message" role="alert"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" id="remember">
+                        <span>Ingat saya</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" id="loginBtn">
+                    <span class="btn-text">Masuk</span>
+                    <span class="btn-loading" style="display: none;">
+                        <span class="spinner"></span> Memproses...
+                    </span>
+                </button>
+
+                <div class="form-footer">
+                    <p>Belum punya akun? <a href="register.html" class="link">Daftar sekarang</a></p>
+                    <p><a href="forgot-password.html" class="link">Lupa password?</a></p>
+                </div>
+            </form>
+
+            <div class="accessibility-options">
+                <h3>Opsi Aksesibilitas</h3>
+                <div class="accessibility-controls">
+                    <button onclick="increaseFontSize()" class="accessibility-btn" aria-label="Perbesar teks">
+                        <span>A+</span>
+                    </button>
+                    <button onclick="decreaseFontSize()" class="accessibility-btn" aria-label="Perkecil teks">
+                        <span>A-</span>
+                    </button>
+                    <button onclick="toggleHighContrast()" class="accessibility-btn" aria-label="Mode kontras tinggi">
+                        <span>⚫⚪</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert/Notification -->
+    <div id="alert" class="alert" role="alert" aria-live="polite" style="display: none;">
+        <span class="alert-message"></span>
+        <button class="alert-close" onclick="closeAlert()" aria-label="Tutup notifikasi">&times;</button>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.setAttribute('aria-label', 'Sembunyikan password');
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.setAttribute('aria-label', 'Tampilkan password');
+            }
+        }
+
+        // Accessibility functions
+        let currentFontSize = 16;
+        
+        function increaseFontSize() {
+            if (currentFontSize < 24) {
+                currentFontSize += 2;
+                document.documentElement.style.fontSize = currentFontSize + 'px';
+                localStorage.setItem('fontSize', currentFontSize);
+            }
+        }
+        
+        function decreaseFontSize() {
+            if (currentFontSize > 12) {
+                currentFontSize -= 2;
+                document.documentElement.style.fontSize = currentFontSize + 'px';
+                localStorage.setItem('fontSize', currentFontSize);
+            }
+        }
+        
+        function toggleHighContrast() {
+            document.body.classList.toggle('high-contrast');
+            const isHighContrast = document.body.classList.contains('high-contrast');
+            localStorage.setItem('highContrast', isHighContrast);
+        }
+
+        // Load accessibility preferences
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedFontSize) {
+                currentFontSize = parseInt(savedFontSize);
+                document.documentElement.style.fontSize = currentFontSize + 'px';
+            }
+            
+            const savedHighContrast = localStorage.getItem('highContrast');
+            if (savedHighContrast === 'true') {
+                document.body.classList.add('high-contrast');
+            }
+        });
+
+        // Alert functions
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            const alertMessage = alert.querySelector('.alert-message');
+            
+            alert.className = `alert alert-${type}`;
+            alertMessage.textContent = message;
+            alert.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                closeAlert();
+            }, 5000);
+        }
+        
+        function closeAlert() {
+            const alert = document.getElementById('alert');
+            alert.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
