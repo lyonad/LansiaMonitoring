@@ -265,6 +265,8 @@ const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
         
+        console.log('Attempting to delete user ID:', id);
+        
         // Check if user exists
         const [users] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
         if (users.length === 0) {
@@ -283,44 +285,72 @@ const deleteUser = async (req, res) => {
         }
         
         // Start transaction
-        await db.beginTransaction();
+        const connection = await db.getConnection();
+        await connection.beginTransaction();
         
         try {
-            // Delete related data
-            await db.query('DELETE FROM emergency_contacts WHERE user_id = ?', [id]);
-            await db.query('DELETE FROM family_elderly_relations WHERE family_user_id = ? OR elderly_user_id = ?', [id, id]);
-            await db.query('DELETE FROM medicines WHERE user_id = ?', [id]);
-            await db.query('DELETE FROM health_records WHERE user_id = ?', [id]);
-            await db.query('DELETE FROM appointments WHERE user_id = ?', [id]);
-            await db.query('DELETE FROM chats WHERE sender_id = ? OR receiver_id = ?', [id, id]);
-            await db.query('DELETE FROM notifications WHERE user_id = ?', [id]);
-            await db.query('DELETE FROM activity_logs WHERE user_id = ?', [id]);
+            // Delete in correct order to avoid foreign key constraints
+            console.log('Deleting related data for user:', id);
             
-            // Delete user
-            await db.query('DELETE FROM users WHERE id = ?', [id]);
+            // Delete medicine logs first (references medicines)
+            await connection.query(
+                'DELETE ml FROM medicine_logs ml INNER JOIN medicines m ON ml.medicine_id = m.id WHERE m.user_id = ?',
+                [id]
+            );
+            
+            // Delete from all related tables
+            await connection.query('DELETE FROM emergency_contacts WHERE user_id = ?', [id]);
+            await connection.query('DELETE FROM family_elderly_relations WHERE family_user_id = ? OR elderly_user_id = ?', [id, id]);
+            await connection.query('DELETE FROM medicines WHERE user_id = ?', [id]);
+            await connection.query('DELETE FROM health_records WHERE user_id = ?', [id]);
+            await connection.query('DELETE FROM appointments WHERE user_id = ?', [id]);
+            await connection.query('DELETE FROM chats WHERE sender_id = ? OR receiver_id = ?', [id, id]);
+            await connection.query('DELETE FROM forum_comments WHERE user_id = ?', [id]);
+            await connection.query('DELETE FROM forum_posts WHERE user_id = ?', [id]);
+            await connection.query('DELETE FROM notifications WHERE user_id = ?', [id]);
+            await connection.query('DELETE FROM activity_logs WHERE user_id = ?', [id]);
+            
+            // Finally delete the user
+            await connection.query('DELETE FROM users WHERE id = ?', [id]);
             
             // Commit transaction
-            await db.commit();
+            await connection.commit();
+            console.log('User deleted successfully:', id);
             
-            // Log activity
-            await db.query(
+            // Log activity (use connection since user is deleted)
+            await connection.query(
                 'INSERT INTO activity_logs (user_id, action, description, ip_address) VALUES (?, ?, ?, ?)',
-                [req.user.id, 'DELETE_USER', `Admin menghapus user: ${users[0].username}`, req.ip]
+                [req.user.id, 'DELETE_USER', `Admin menghapus user: ${users[0].username} (ID: ${id})`, req.ip]
             );
+            
+            connection.release();
             
             res.json({
                 success: true,
                 message: 'User berhasil dihapus'
             });
         } catch (error) {
-            await db.rollback();
+            // Rollback on error
+            await connection.rollback();
+            connection.release();
+            
+            console.error('Transaction error during delete:', error);
+            
+            // Check for specific errors
+            if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'User tidak bisa dihapus karena masih memiliki data terkait'
+                });
+            }
+            
             throw error;
         }
     } catch (error) {
         console.error('Delete user error:', error);
         res.status(500).json({
             success: false,
-            message: 'Gagal menghapus user'
+            message: 'Gagal menghapus user: ' + error.message
         });
     }
 };
