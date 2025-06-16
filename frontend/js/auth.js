@@ -56,107 +56,118 @@ function redirectToDashboard(role) {
 }
 
 // Login form handler
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const loginBtn = document.getElementById('loginBtn');
-    
-    // Clear previous errors
-    document.getElementById('username-error').textContent = '';
-    document.getElementById('password-error').textContent = '';
-    
-    // Show loading state
-    loginBtn.disabled = true;
-    loginBtn.querySelector('.btn-text').style.display = 'none';
-    loginBtn.querySelector('.btn-loading').style.display = 'inline-block';
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        });
+if (document.getElementById('loginForm')) {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        const data = await response.json();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const loginBtn = document.getElementById('loginBtn');
         
-        if (response.ok && data.success) {
-            // Save token and user data
-            setToken(data.data.token);
-            setUser(data.data.user);
+        // Clear previous errors
+        document.getElementById('username-error').textContent = '';
+        document.getElementById('password-error').textContent = '';
+        
+        // Show loading state
+        loginBtn.disabled = true;
+        loginBtn.querySelector('.btn-text').style.display = 'none';
+        loginBtn.querySelector('.btn-loading').style.display = 'inline-block';
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
             
-            // Show success message
-            showAlert('Login berhasil! Mengalihkan...', 'success');
+            const data = await response.json();
             
-            // Redirect after 1 second
-            setTimeout(() => {
-                redirectToDashboard(data.data.user.role);
-            }, 1000);
-        } else {
-            // Show error message
-            if (data.message) {
-                showAlert(data.message, 'error');
+            if (response.ok && data.success) {
+                // Save token and user data
+                setToken(data.data.token);
+                setUser(data.data.user);
+                
+                // Show success message
+                showAlert('Login berhasil! Mengalihkan...', 'success');
+                
+                // Redirect after 1 second
+                setTimeout(() => {
+                    redirectToDashboard(data.data.user.role);
+                }, 1000);
             } else {
-                showAlert('Login gagal. Silakan coba lagi.', 'error');
+                // Show error message
+                if (data.message) {
+                    showAlert(data.message, 'error');
+                } else {
+                    showAlert('Login gagal. Silakan coba lagi.', 'error');
+                }
+                
+                // Show field-specific errors if available
+                if (data.errors) {
+                    data.errors.forEach(error => {
+                        const errorElement = document.getElementById(`${error.field}-error`);
+                        if (errorElement) {
+                            errorElement.textContent = error.message;
+                        }
+                    });
+                }
             }
-            
-            // Show field-specific errors if available
-            if (data.errors) {
-                data.errors.forEach(error => {
-                    const errorElement = document.getElementById(`${error.field}-error`);
-                    if (errorElement) {
-                        errorElement.textContent = error.message;
-                    }
-                });
-            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showAlert('Terjadi kesalahan. Silakan coba lagi.', 'error');
+        } finally {
+            // Reset button state
+            loginBtn.disabled = false;
+            loginBtn.querySelector('.btn-text').style.display = 'inline-block';
+            loginBtn.querySelector('.btn-loading').style.display = 'none';
         }
-    } catch (error) {
-        console.error('Login error:', error);
-        showAlert('Terjadi kesalahan. Silakan coba lagi.', 'error');
-    } finally {
-        // Reset button state
-        loginBtn.disabled = false;
-        loginBtn.querySelector('.btn-text').style.display = 'inline-block';
-        loginBtn.querySelector('.btn-loading').style.display = 'none';
-    }
-});
+    });
+}
 
 // Auto-fill username if remembered
 window.addEventListener('DOMContentLoaded', () => {
     const rememberedUsername = localStorage.getItem('rememberedUsername');
-    if (rememberedUsername) {
-        document.getElementById('username').value = rememberedUsername;
-        document.getElementById('remember').checked = true;
+    const usernameInput = document.getElementById('username');
+    const rememberCheckbox = document.getElementById('remember');
+    
+    if (rememberedUsername && usernameInput) {
+        usernameInput.value = rememberedUsername;
+        if (rememberCheckbox) {
+            rememberCheckbox.checked = true;
+        }
     }
     
     // Check if already logged in
     if (isAuthenticated()) {
         const user = getUser();
-        if (user) {
+        if (user && window.location.pathname.includes('login.html')) {
             redirectToDashboard(user.role);
         }
     }
 });
 
 // Handle remember me
-document.getElementById('remember').addEventListener('change', (e) => {
-    const username = document.getElementById('username').value;
-    if (e.target.checked && username) {
-        localStorage.setItem('rememberedUsername', username);
-    } else {
-        localStorage.removeItem('rememberedUsername');
-    }
-});
+if (document.getElementById('remember')) {
+    document.getElementById('remember').addEventListener('change', (e) => {
+        const username = document.getElementById('username').value;
+        if (e.target.checked && username) {
+            localStorage.setItem('rememberedUsername', username);
+        } else {
+            localStorage.removeItem('rememberedUsername');
+        }
+    });
+}
 
 // Update remembered username when typing
-document.getElementById('username').addEventListener('input', (e) => {
-    if (document.getElementById('remember').checked) {
-        localStorage.setItem('rememberedUsername', e.target.value);
-    }
-});
+if (document.getElementById('username')) {
+    document.getElementById('username').addEventListener('input', (e) => {
+        if (document.getElementById('remember') && document.getElementById('remember').checked) {
+            localStorage.setItem('rememberedUsername', e.target.value);
+        }
+    });
+}
 
 // Logout function (to be used on other pages)
 async function logout() {

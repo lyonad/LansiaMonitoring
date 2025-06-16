@@ -16,8 +16,6 @@ function showAddUserModal() {
     const modal = document.getElementById('addUserModal');
     if (modal) {
         modal.style.display = 'flex';
-    } else {
-        console.error('Modal addUserModal not found');
     }
 }
 
@@ -25,8 +23,6 @@ function toggleUserMenu() {
     const dropdown = document.getElementById('userDropdown');
     if (dropdown) {
         dropdown.classList.toggle('active');
-    } else {
-        console.error('Dropdown userDropdown not found');
     }
 }
 
@@ -34,14 +30,10 @@ function toggleNotifications() {
     const dropdown = document.getElementById('notificationDropdown');
     if (dropdown) {
         dropdown.classList.toggle('active');
-    } else {
-        console.error('Dropdown notificationDropdown not found');
     }
 }
 
 function filterUsers() {
-    // Will be overridden later when main script loads
-    console.log('Filter users called');
     if (window.loadUsers) {
         window.loadUsers(1);
     }
@@ -54,6 +46,7 @@ function closeModal(modalId) {
         const form = modal.querySelector('form');
         if (form) form.reset();
     }
+    if (window.clearErrors) window.clearErrors();
 }
 
 function logout() {
@@ -64,25 +57,14 @@ function logout() {
     }
 }
 
-// Placeholder functions that will be overridden
-function editUser(id) {
-    console.log('Edit user:', id);
-}
-
-function deleteUser(id, username) {
-    console.log('Delete user:', id, username);
-}
-
-function resetPassword(id, username) {
-    console.log('Reset password for:', username);
-}
-
-console.log('Emergency functions loaded');
+// These will be overridden later
+function editUser(id) { console.log('Edit user:', id); }
+function deleteUser(id, username) { console.log('Delete user:', id, username); }
+function resetPassword(id, username) { console.log('Reset password for:', username); }
 </script>
 
-<!-- Rest of your HTML content continues here -->
-<!-- Skip to main content -->
-<a href="#main-content" class="skip-link">Skip to main content</a>
+    <!-- Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- Header -->
     <header class="header">
@@ -533,58 +515,83 @@ console.log('Emergency functions loaded');
 
     <script src="../../js/auth.js"></script>
     <script>
-        // API Configuration
-        const API_BASE_URL = 'http://localhost:3000/api';
+        // Variables
         let currentPage = 1;
         const limit = 10;
 
-        // Check authentication
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!window.auth.isAuthenticated()) {
-                window.location.href = '../../login.html';
-                return;
+        // Override emergency functions with proper implementations
+        window.editUser = async function(userId) {
+            try {
+                const response = await window.auth.apiRequest(`/users/${userId}`);
+                if (response.success) {
+                    const user = response.data;
+                    document.getElementById('editUserId').value = user.id;
+                    document.getElementById('editUsername').value = user.username;
+                    document.getElementById('editEmail').value = user.email;
+                    document.getElementById('editFullName').value = user.full_name;
+                    document.getElementById('editRole').value = user.role;
+                    document.getElementById('editPhone').value = user.phone || '';
+                    
+                    document.getElementById('editUserModal').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error fetching user:', error);
+                showToast('Gagal memuat data user', 'error');
             }
+        }
 
-            const user = window.auth.getUser();
-            if (user.role !== 'admin') {
-                window.location.href = '../user/dashboard.html';
-                return;
+        window.deleteUser = async function(userId, username) {
+            if (confirm(`Yakin ingin menghapus user "${username}"?\n\nSemua data terkait user ini akan ikut terhapus.`)) {
+                try {
+                    const response = await window.auth.apiRequest(`/users/${userId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.success) {
+                        showToast('User berhasil dihapus');
+                        loadUsers(currentPage);
+                    } else {
+                        showToast(response.message || 'Gagal menghapus user', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    showToast('Gagal menghapus user', 'error');
+                }
             }
+        }
 
-            document.getElementById('userName').textContent = user.full_name || user.username;
+        window.resetPassword = function(userId, username) {
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('resetUsername').textContent = username;
+            document.getElementById('resetPasswordModal').style.display = 'flex';
+        }
+
+        // Helper functions
+        window.clearErrors = function() {
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
             
-            loadUsers();
-        });
-
-        // Menu toggles
-        document.getElementById('menuToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.querySelector('.main-content').classList.toggle('sidebar-active');
-        });
-
-        function toggleNotifications() {
-            document.getElementById('notificationDropdown').classList.toggle('active');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toastMessage.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
         }
 
-        function toggleUserMenu() {
-            document.getElementById('userDropdown').classList.toggle('active');
-        }
-
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.notifications')) {
-                document.getElementById('notificationDropdown').classList.remove('active');
-            }
-            if (!e.target.closest('.user-menu')) {
-                document.getElementById('userDropdown').classList.remove('active');
-            }
-        });
-
-        async function logout() {
-            if (confirm('Apakah Anda yakin ingin keluar?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '../../login.html';
-            }
+        function getRoleName(role) {
+            const roles = {
+                admin: 'Admin',
+                family: 'Keluarga',
+                elderly: 'Lansia',
+                medical: 'Tenaga Medis'
+            };
+            return roles[role] || role;
         }
 
         // Load users from API
@@ -613,6 +620,9 @@ console.log('Emergency functions loaded');
                 showToast('Gagal memuat data users', 'error');
             }
         }
+
+        // Make loadUsers global for filterUsers
+        window.loadUsers = loadUsers;
 
         // Display users in table
         function displayUsers(users) {
@@ -683,213 +693,160 @@ console.log('Emergency functions loaded');
             currentPage = pagination.page;
         }
 
-        function getRoleName(role) {
-            const roles = {
-                admin: 'Admin',
-                family: 'Keluarga',
-                elderly: 'Lansia',
-                medical: 'Tenaga Medis'
-            };
-            return roles[role] || role;
-        }
-
-        // Filter users
-        function filterUsers() {
-            loadUsers(1);
-        }
-
-        // Add event listeners for real-time search
-        document.getElementById('searchInput').addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                filterUsers();
-            }
-        });
-
-        document.getElementById('roleFilter').addEventListener('change', filterUsers);
-
-        // Modal functions
-        function showAddUserModal() {
-            document.getElementById('addUserModal').style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            document.getElementById(modalId).querySelector('form').reset();
-            clearErrors();
-        }
-
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-        }
-
-        // Add user form submission
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearErrors();
-
-            const formData = {
-                username: document.getElementById('newUsername').value,
-                password: document.getElementById('newPassword').value,
-                email: document.getElementById('newEmail').value,
-                fullName: document.getElementById('newFullName').value,
-                role: document.getElementById('newRole').value,
-                phone: document.getElementById('newPhone').value
-            };
-
-            try {
-                const response = await window.auth.apiRequest('/users', {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
-                });
-
-                if (response.success) {
-                    showToast('User berhasil ditambahkan');
-                    closeModal('addUserModal');
-                    loadUsers(currentPage);
-                } else {
-                    if (response.errors) {
-                        response.errors.forEach(error => {
-                            const field = error.path || error.param;
-                            const errorEl = document.getElementById(`new${field.charAt(0).toUpperCase() + field.slice(1)}-error`);
-                            if (errorEl) {
-                                errorEl.textContent = error.msg || error.message;
-                            }
-                        });
-                    } else {
-                        showToast(response.message || 'Gagal menambahkan user', 'error');
-                    }
-                }
-            } catch (error) {
-                console.error('Error adding user:', error);
-                showToast('Gagal menambahkan user', 'error');
-            }
-        });
-
-        // Edit user
-        async function editUser(userId) {
-            try {
-                const response = await window.auth.apiRequest(`/users/${userId}`);
-                if (response.success) {
-                    const user = response.data;
-                    document.getElementById('editUserId').value = user.id;
-                    document.getElementById('editUsername').value = user.username;
-                    document.getElementById('editEmail').value = user.email;
-                    document.getElementById('editFullName').value = user.full_name;
-                    document.getElementById('editRole').value = user.role;
-                    document.getElementById('editPhone').value = user.phone || '';
-                    
-                    document.getElementById('editUserModal').style.display = 'flex';
-                }
-            } catch (error) {
-                console.error('Error fetching user:', error);
-                showToast('Gagal memuat data user', 'error');
-            }
-        }
-
-        // Edit user form submission
-        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearErrors();
-
-            const userId = document.getElementById('editUserId').value;
-            const formData = {
-                username: document.getElementById('editUsername').value,
-                email: document.getElementById('editEmail').value,
-                fullName: document.getElementById('editFullName').value,
-                role: document.getElementById('editRole').value,
-                phone: document.getElementById('editPhone').value
-            };
-
-            try {
-                const response = await window.auth.apiRequest(`/users/${userId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(formData)
-                });
-
-                if (response.success) {
-                    showToast('User berhasil diupdate');
-                    closeModal('editUserModal');
-                    loadUsers(currentPage);
-                } else {
-                    showToast(response.message || 'Gagal mengupdate user', 'error');
-                }
-            } catch (error) {
-                console.error('Error updating user:', error);
-                showToast('Gagal mengupdate user', 'error');
-            }
-        });
-
-        // Delete user
-        async function deleteUser(userId, username) {
-            if (confirm(`Yakin ingin menghapus user "${username}"?\n\nSemua data terkait user ini akan ikut terhapus.`)) {
-                try {
-                    const response = await window.auth.apiRequest(`/users/${userId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.success) {
-                        showToast('User berhasil dihapus');
-                        loadUsers(currentPage);
-                    } else {
-                        showToast(response.message || 'Gagal menghapus user', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error deleting user:', error);
-                    showToast('Gagal menghapus user', 'error');
-                }
-            }
-        }
-
-        // Reset password
-        function resetPassword(userId, username) {
-            document.getElementById('resetUserId').value = userId;
-            document.getElementById('resetUsername').textContent = username;
-            document.getElementById('resetPasswordModal').style.display = 'flex';
-        }
-
-        // Reset password form submission
-        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearErrors();
-
-            const userId = document.getElementById('resetUserId').value;
-            const newPassword = document.getElementById('resetNewPassword').value;
-
-            if (newPassword.length < 6) {
-                document.getElementById('resetNewPassword-error').textContent = 'Password minimal 6 karakter';
+        // Check authentication and setup when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.auth.isAuthenticated()) {
+                window.location.href = '../../login.html';
                 return;
             }
 
-            try {
-                const response = await window.auth.apiRequest(`/users/${userId}/reset-password`, {
-                    method: 'POST',
-                    body: JSON.stringify({ newPassword })
-                });
-
-                if (response.success) {
-                    showToast('Password berhasil direset');
-                    closeModal('resetPasswordModal');
-                } else {
-                    showToast(response.message || 'Gagal reset password', 'error');
-                }
-            } catch (error) {
-                console.error('Error resetting password:', error);
-                showToast('Gagal reset password', 'error');
+            const user = window.auth.getUser();
+            if (user.role !== 'admin') {
+                window.location.href = '../user/dashboard.html';
+                return;
             }
+
+            document.getElementById('userName').textContent = user.full_name || user.username;
+            
+            // Load initial data
+            loadUsers();
+
+            // Setup event listeners
+            setupEventListeners();
         });
 
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-            toastMessage.textContent = message;
-            toast.style.display = 'block';
-            
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
+        function setupEventListeners() {
+            // Menu toggle
+            document.getElementById('menuToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('sidebar-active');
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.notifications')) {
+                    document.getElementById('notificationDropdown').classList.remove('active');
+                }
+                if (!e.target.closest('.user-menu')) {
+                    document.getElementById('userDropdown').classList.remove('active');
+                }
+            });
+
+            // Search and filter
+            document.getElementById('searchInput').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    filterUsers();
+                }
+            });
+
+            document.getElementById('roleFilter').addEventListener('change', filterUsers);
+
+            // Add user form
+            document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearErrors();
+
+                const formData = {
+                    username: document.getElementById('newUsername').value,
+                    password: document.getElementById('newPassword').value,
+                    email: document.getElementById('newEmail').value,
+                    fullName: document.getElementById('newFullName').value,
+                    role: document.getElementById('newRole').value,
+                    phone: document.getElementById('newPhone').value
+                };
+
+                try {
+                    const response = await window.auth.apiRequest('/users', {
+                        method: 'POST',
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.success) {
+                        showToast('User berhasil ditambahkan');
+                        closeModal('addUserModal');
+                        loadUsers(currentPage);
+                    } else {
+                        if (response.errors) {
+                            response.errors.forEach(error => {
+                                const field = error.path || error.param;
+                                const errorEl = document.getElementById(`new${field.charAt(0).toUpperCase() + field.slice(1)}-error`);
+                                if (errorEl) {
+                                    errorEl.textContent = error.msg || error.message;
+                                }
+                            });
+                        } else {
+                            showToast(response.message || 'Gagal menambahkan user', 'error');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error adding user:', error);
+                    showToast('Gagal menambahkan user', 'error');
+                }
+            });
+
+            // Edit user form
+            document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearErrors();
+
+                const userId = document.getElementById('editUserId').value;
+                const formData = {
+                    username: document.getElementById('editUsername').value,
+                    email: document.getElementById('editEmail').value,
+                    fullName: document.getElementById('editFullName').value,
+                    role: document.getElementById('editRole').value,
+                    phone: document.getElementById('editPhone').value
+                };
+
+                try {
+                    const response = await window.auth.apiRequest(`/users/${userId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.success) {
+                        showToast('User berhasil diupdate');
+                        closeModal('editUserModal');
+                        loadUsers(currentPage);
+                    } else {
+                        showToast(response.message || 'Gagal mengupdate user', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating user:', error);
+                    showToast('Gagal mengupdate user', 'error');
+                }
+            });
+
+            // Reset password form
+            document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearErrors();
+
+                const userId = document.getElementById('resetUserId').value;
+                const newPassword = document.getElementById('resetNewPassword').value;
+
+                if (newPassword.length < 6) {
+                    document.getElementById('resetNewPassword-error').textContent = 'Password minimal 6 karakter';
+                    return;
+                }
+
+                try {
+                    const response = await window.auth.apiRequest(`/users/${userId}/reset-password`, {
+                        method: 'POST',
+                        body: JSON.stringify({ newPassword })
+                    });
+
+                    if (response.success) {
+                        showToast('Password berhasil direset');
+                        closeModal('resetPasswordModal');
+                    } else {
+                        showToast(response.message || 'Gagal reset password', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error resetting password:', error);
+                    showToast('Gagal reset password', 'error');
+                }
+            });
         }
     </script>
 </body>
