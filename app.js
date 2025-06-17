@@ -1,4 +1,4 @@
-// app.js - Main server file
+// app.js - Main server file (Updated with monitoring routes)
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -13,6 +13,10 @@ const appointmentRoutes = require('./routes/appointments');
 const chatRoutes = require('./routes/chats');
 const reportRoutes = require('./routes/reports');
 const notificationRoutes = require('./routes/notifications');
+const monitoringRoutes = require('./routes/monitoring'); // NEW
+
+// Import controllers jika perlu
+const { sendMedicineReminders } = require('./controllers/notificationController');
 
 const app = express();
 
@@ -31,6 +35,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/monitoring', monitoringRoutes); // NEW
 
 // Error handling middleware
 app.use((err, req, res, next) => {
