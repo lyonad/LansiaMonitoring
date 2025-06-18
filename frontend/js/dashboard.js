@@ -411,61 +411,10 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Accessibility functions
-let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 16;
-
-function increaseFontSize() {
-    if (currentFontSize < 24) {
-        currentFontSize += 2;
-        document.documentElement.style.fontSize = currentFontSize + 'px';
-        localStorage.setItem('fontSize', currentFontSize);
-    }
-}
-
-function decreaseFontSize() {
-    if (currentFontSize > 12) {
-        currentFontSize -= 2;
-        document.documentElement.style.fontSize = currentFontSize + 'px';
-        localStorage.setItem('fontSize', currentFontSize);
-    }
-}
-
-function toggleHighContrast() {
-    document.body.classList.toggle('high-contrast');
-    const isHighContrast = document.body.classList.contains('high-contrast');
-    localStorage.setItem('highContrast', isHighContrast);
-}
-
-function toggleDyslexiaFont() {
-    document.body.classList.toggle('dyslexia-friendly');
-    const isDyslexia = document.body.classList.contains('dyslexia-friendly');
-    localStorage.setItem('dyslexiaFont', isDyslexia);
-}
-
-// Initialize accessibility preferences
-window.addEventListener('DOMContentLoaded', () => {
-    // Font size
-    if (currentFontSize !== 16) {
-        document.documentElement.style.fontSize = currentFontSize + 'px';
-    }
-    
-    // High contrast
-    if (localStorage.getItem('highContrast') === 'true') {
-        document.body.classList.add('high-contrast');
-    }
-    
-    // Dyslexia font
-    if (localStorage.getItem('dyslexiaFont') === 'true') {
-        document.body.classList.add('dyslexia-friendly');
-    }
-});
+// Note: Accessibility functions have been moved to accessibility.js
 
 // Export functions for use in HTML
 window.dashboard = {
     loadDashboardData,
-    showToast,
-    increaseFontSize,
-    decreaseFontSize,
-    toggleHighContrast,
-    toggleDyslexiaFont
+    showToast
 };

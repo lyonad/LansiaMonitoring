@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan - LansiaMonitoring Admin</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/accessibility.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+    <link rel="stylesheet" href="../../css/admin.css">
+    <link rel="stylesheet" href="../../css/reports.css">
+</head>
+<body>
+    <!-- Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <span class="hamburger"></span>
+                </button>
+                <h1 class="header-title">LansiaMonitoring - Admin</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="notifications">
+                    <button class="notification-btn" aria-label="Notifications" onclick="toggleNotifications()">
+                        <span class="notification-icon">🔔</span>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <h3>Notifikasi</h3>
+                        <div class="notification-list">
+                            <p class="no-notifications">Tidak ada notifikasi</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" onclick="toggleUserMenu()">
+                        <img src="../../images/default-avatar.svg" alt="User avatar" class="user-avatar">
+                        <span class="user-name" id="userName">Admin</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">👤 Profil Saya</a>
+                        <a href="settings.html" class="dropdown-item">⚙️ Pengaturan</a>
+                        <button onclick="logout()" class="dropdown-item logout-btn">🚪 Keluar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="users.html" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Manajemen User</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="monitoring.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Monitoring</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="reports.html" class="nav-link">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Laporan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="medicines.html" class="nav-link">
+                    <span class="nav-icon">💊</span>
+                    <span class="nav-text">Data Obat</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appointments.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">Jadwal</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forum-moderation.html" class="nav-link">
+                    <span class="nav-icon">🗣️</span>
+                    <span class="nav-text">Moderasi Forum</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="system-logs.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Log Sistem</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Pengaturan</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Report Header -->
+        <div class="report-header">
+            <div class="header-content">
+                <h2>Laporan Kesehatan Lansia</h2>
+                <p class="header-subtitle">Generate dan kelola laporan kesehatan keseluruhan</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showGenerateReportModal()">
+                    📊 Generate Laporan Baru
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon elderly">👴</div>
+                <div class="stat-content">
+                    <h3>Total Lansia</h3>
+                    <p class="stat-value" id="totalElderly">0</p>
+                    <p class="stat-label">Lansia Terdaftar</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon health">❤️</div>
+                <div class="stat-content">
+                    <h3>Pemeriksaan Vital</h3>
+                    <p class="stat-value" id="totalVitals">0</p>
+                    <p class="stat-label">Minggu Ini</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon medicine">💊</div>
+                <div class="stat-content">
+                    <h3>Kepatuhan Obat</h3>
+                    <p class="stat-value" id="medicineCompliance">0%</p>
+                    <p class="stat-label">Rata-rata Minggu Ini</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon report">📄</div>
+                <div class="stat-content">
+                    <h3>Total Laporan</h3>
+                    <p class="stat-value" id="totalReports">0</p>
+                    <p class="stat-label">Tersimpan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Report Section -->
+        <div class="report-section" id="currentReportSection" style="display: none;">
+            <div class="section-header">
+                <h3>Laporan Saat Ini</h3>
+                <div class="report-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="printReport()">
+                        🖨️ Print
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="exportReport('pdf')">
+                        📥 Export PDF
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="saveReport()">
+                        💾 Simpan
+                    </button>
+                </div>
+            </div>
+            
+            <div class="report-content" id="reportContent">
+                <!-- Report will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Saved Reports -->
+        <div class="report-section">
+            <div class="section-header">
+                <h3>Laporan Tersimpan</h3>
+                <div class="section-filters">
+                    <select id="reportTypeFilter" onchange="filterReports()">
+                        <option value="">Semua Tipe</option>
+                        <option value="overall">Keseluruhan</option>
+                        <option value="daily">Harian</option>
+                        <option value="weekly">Mingguan</option>
+                        <option value="monthly">Bulanan</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipe</th>
+                            <th>Periode</th>
+                            <th>Dibuat Oleh</th>
+                            <th>Tanggal Dibuat</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading-cell">Memuat laporan...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Generate Report Modal -->
+    <div class="modal" id="generateReportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Generate Laporan Baru</h3>
+                <button class="modal-close" onclick="closeGenerateReportModal()">×</button>
+            </div>
+            <form id="generateReportForm">
+                <div class="form-group">
+                    <label for="reportType">Tipe Laporan</label>
+                    <select id="reportType" required>
+                        <option value="overall">Laporan Keseluruhan</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Tanggal Mulai</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Tanggal Akhir</label>
+                        <input type="date" id="endDate" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeGenerateReportModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Generate Laporan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Template for Printing -->
+    <div id="printTemplate" style="display: none;">
+        <style>
+            @media print {
+                body { margin: 0; font-family: Arial, sans-serif; }
+                .print-header { text-align: center; margin-bottom: 30px; }
+                .print-header h1 { margin: 0 0 10px 0; }
+                .print-section { margin: 20px 0; page-break-inside: avoid; }
+                .print-section h2 { font-size: 18px; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f4f4f4; }
+                .stats-box { display: flex; justify-content: space-around; margin: 20px 0; }
+                .stat { text-align: center; }
+                .stat-value { font-size: 24px; font-weight: bold; }
+            }
+        </style>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../js/report.js"></script>
+</body>
+</html>

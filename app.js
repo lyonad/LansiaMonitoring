@@ -70,7 +70,6 @@ const cron = require('node-cron');
 /*
 cron.schedule('0 * * * *', async () => {
     console.log('Checking medicine reminders...');
-    const { sendMedicineReminders } = require('./controllers/notificationController');
     await sendMedicineReminders();
 });
 */

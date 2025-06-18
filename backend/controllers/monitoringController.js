@@ -1,321 +1,94 @@
 // controllers/monitoringController.js
 const db = require('../config/database');
 
-// Get elderly list for monitoring
-const getElderlyList = async (req, res) => {
+// Get monitoring dashboard data
+const getMonitoringDashboard = async (req, res) => {
     try {
-        console.log('Getting elderly list...'); // Debug log
-        
-        // Query yang lebih sederhana untuk menghindari masalah GROUP BY
-        const [elderly] = await db.query(`
-            SELECT DISTINCT
+        // Get active alerts count by type
+        const [alertCounts] = await db.query(`
+            SELECT 
+                alert_type,
+                COUNT(*) as count
+            FROM monitoring_alerts
+            WHERE is_dismissed = FALSE
+            GROUP BY alert_type
+        `);
+
+        // Get recent vital signs with threshold violations
+        const [vitalViolations] = await db.query(`
+            SELECT 
+                vs.id,
+                vs.elderly_id,
+                u.full_name as elderly_name,
+                vs.measurement_date,
+                vs.blood_pressure_sys,
+                vs.blood_pressure_dia,
+                vs.heart_rate,
+                vs.blood_sugar,
+                vs.oxygen_saturation,
+                vt.sys_min, vt.sys_max,
+                vt.dia_min, vt.dia_max,
+                vt.heart_rate_min, vt.heart_rate_max,
+                vt.oxygen_min,
+                CASE 
+                    WHEN vs.blood_pressure_sys > vt.sys_max OR vs.blood_pressure_sys < vt.sys_min THEN 'critical'
+                    WHEN vs.blood_pressure_dia > vt.dia_max OR vs.blood_pressure_dia < vt.dia_min THEN 'critical'
+                    WHEN vs.heart_rate > vt.heart_rate_max OR vs.heart_rate < vt.heart_rate_min THEN 'high'
+                    WHEN vs.oxygen_saturation < vt.oxygen_min THEN 'critical'
+                    ELSE 'normal'
+                END as status
+            FROM vital_signs vs
+            JOIN users u ON vs.elderly_id = u.id
+            LEFT JOIN vital_thresholds vt ON vs.elderly_id = vt.elderly_id
+            WHERE vs.measurement_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            ORDER BY vs.measurement_date DESC
+            LIMIT 20
+        `);
+
+        // Get elderly with no recent vital signs (need attention)
+        const [inactiveElderly] = await db.query(`
+            SELECT 
                 u.id,
                 u.full_name,
                 u.phone,
-                u.date_of_birth,
-                u.address,
-                (SELECT COUNT(*) FROM family_elderly_relations WHERE elderly_user_id = u.id) as family_count,
-                (SELECT MAX(created_at) FROM vital_signs WHERE elderly_id = u.id) as last_vitals_check,
-                (SELECT MAX(recorded_at) FROM health_records WHERE user_id = u.id) as last_health_check
+                MAX(vs.measurement_date) as last_measurement,
+                DATEDIFF(NOW(), MAX(vs.measurement_date)) as days_since_last
             FROM users u
-            WHERE u.role = 'elderly'
-            ORDER BY u.full_name
+            LEFT JOIN vital_signs vs ON u.id = vs.elderly_id
+            WHERE u.role = 'elderly' AND u.is_active = TRUE
+            GROUP BY u.id
+            HAVING days_since_last > 3 OR last_measurement IS NULL
+            ORDER BY days_since_last DESC
         `);
-        
-        console.log(`Found ${elderly.length} elderly users`); // Debug log
 
-        // Format last vitals check - use either vital_signs or health_records
-        const formattedElderly = elderly.map(e => {
-            let lastVitals = 'Belum ada';
-            const lastCheck = e.last_vitals_check || e.last_health_check;
-            
-            if (lastCheck) {
-                const checkDate = new Date(lastCheck);
-                const now = new Date();
-                const diffMs = now - checkDate;
-                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-                
-                if (diffHours < 1) {
-                    lastVitals = 'Kurang dari 1 jam lalu';
-                } else if (diffHours < 24) {
-                    lastVitals = `${diffHours} jam lalu`;
-                } else {
-                    const diffDays = Math.floor(diffHours / 24);
-                    lastVitals = `${diffDays} hari lalu`;
-                }
-            }
-
-            // Calculate age
-            let age = null;
-            if (e.date_of_birth) {
-                const birthDate = new Date(e.date_of_birth);
-                const today = new Date();
-                age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-            }
-
-            return {
-                ...e,
-                age,
-                last_vitals: lastVitals
-            };
-        });
-
-        res.json({
-            success: true,
-            data: formattedElderly
-        });
-    } catch (error) {
-        console.error('Error getting elderly list:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Gagal mengambil daftar lansia'
-        });
-    }
-};
-
-// Get monitoring data for specific elderly
-const getElderlyMonitoring = async (req, res) => {
-    try {
-        const { elderlyId } = req.params;
-
-        // Get elderly info
-        const [elderlyData] = await db.query(
-            'SELECT * FROM users WHERE id = ? AND role = "elderly"',
-            [elderlyId]
-        );
-
-        if (elderlyData.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Lansia tidak ditemukan'
-            });
-        }
-
-        const elderly = elderlyData[0];
-
-        // Calculate age
-        let age = null;
-        if (elderly.date_of_birth) {
-            const birthDate = new Date(elderly.date_of_birth);
-            const today = new Date();
-            age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-        }
-
-        // Get latest vital signs from either vital_signs or health_records
-        const [vitalsFromVitalSigns] = await db.query(`
-            SELECT * FROM vital_signs 
-            WHERE elderly_id = ? 
-            ORDER BY measurement_date DESC 
-            LIMIT 1
-        `, [elderlyId]);
-
-        const [vitalsFromHealthRecords] = await db.query(`
+        // Get medication compliance stats
+        const [medicationStats] = await db.query(`
             SELECT 
-                blood_pressure_systolic as blood_pressure_sys,
-                blood_pressure_diastolic as blood_pressure_dia,
-                heart_rate,
-                blood_sugar_level as blood_sugar,
-                temperature,
-                weight,
-                recorded_at as measurement_date
-            FROM health_records 
-            WHERE user_id = ? 
-            ORDER BY recorded_at DESC 
-            LIMIT 1
-        `, [elderlyId]);
-
-        // Use whichever is more recent
-        let vitals = null;
-        if (vitalsFromVitalSigns[0] && vitalsFromHealthRecords[0]) {
-            const vsDate = new Date(vitalsFromVitalSigns[0].measurement_date);
-            const hrDate = new Date(vitalsFromHealthRecords[0].measurement_date);
-            vitals = vsDate > hrDate ? vitalsFromVitalSigns[0] : vitalsFromHealthRecords[0];
-        } else {
-            vitals = vitalsFromVitalSigns[0] || vitalsFromHealthRecords[0];
-        }
-
-        // Get today's medications from both tables
-        const [medicationsFromMonitoring] = await db.query(`
-            SELECT 
-                mm.id,
-                mm.medication_name,
-                mm.dose,
-                mm.frequency,
-                mm.times,
-                mm.notes,
-                CASE 
-                    WHEN EXISTS (
-                        SELECT 1 FROM medication_monitoring_logs mml 
-                        WHERE mml.medication_id = mm.id 
-                        AND DATE(mml.taken_at) = CURDATE()
-                    ) THEN 'taken'
-                    ELSE 'pending'
-                END as status
-            FROM medications_monitoring mm
-            WHERE mm.elderly_id = ? AND mm.is_active = TRUE
-        `, [elderlyId]);
-
-        const [medicationsFromMedicines] = await db.query(`
-            SELECT 
-                m.id,
-                m.medicine_name as medication_name,
-                m.dosage as dose,
-                m.frequency,
-                TIME_FORMAT(m.time_schedule, '%H:%i') as times,
-                m.notes,
-                CASE 
-                    WHEN EXISTS (
-                        SELECT 1 FROM medicine_logs ml 
-                        WHERE ml.medicine_id = m.id 
-                        AND DATE(ml.taken_at) = CURDATE()
-                    ) THEN 'taken'
-                    ELSE 'pending'
-                END as status
+                COUNT(DISTINCT m.elderly_id) as total_elderly_with_meds,
+                COUNT(CASE WHEN ml.status = 'taken' THEN 1 END) as taken_count,
+                COUNT(CASE WHEN ml.status = 'missed' THEN 1 END) as missed_count,
+                COUNT(CASE WHEN ml.status = 'postponed' THEN 1 END) as postponed_count,
+                ROUND(
+                    COUNT(CASE WHEN ml.status = 'taken' THEN 1 END) * 100.0 / 
+                    NULLIF(COUNT(*), 0), 2
+                ) as compliance_rate
             FROM medicines m
-            WHERE m.user_id = ? 
-            AND m.is_active = TRUE
-            AND (m.end_date IS NULL OR m.end_date >= CURDATE())
-        `, [elderlyId]);
-
-        // Combine medications from both tables
-        const medications = [...medicationsFromMonitoring, ...medicationsFromMedicines];
-
-        // Get today's activities
-        const [activities] = await db.query(`
-            SELECT 
-                activity_type,
-                activity_date,
-                value,
-                unit,
-                description
-            FROM activities
-            WHERE elderly_id = ? 
-            AND DATE(activity_date) = CURDATE()
-            ORDER BY activity_date DESC
-        `, [elderlyId]);
-
-        // Get alerts
-        const [alerts] = await db.query(`
-            SELECT 
-                ma.*,
-                u.full_name as created_by_name
-            FROM monitoring_alerts ma
-            JOIN users u ON ma.created_by = u.id
-            WHERE ma.elderly_id = ? 
-            ORDER BY ma.created_at DESC
-            LIMIT 10
-        `, [elderlyId]);
-
-        // Get family contacts
-        const [familyContacts] = await db.query(`
-            SELECT 
-                u.full_name as name,
-                u.email,
-                u.phone,
-                fer.relationship
-            FROM family_elderly_relations fer
-            JOIN users u ON fer.family_user_id = u.id
-            WHERE fer.elderly_user_id = ?
-        `, [elderlyId]);
-
-        // Get vital signs history for chart (last 7 days) from both tables
-        const [vitalHistoryVS] = await db.query(`
-            SELECT 
-                DATE(measurement_date) as date,
-                AVG(blood_pressure_sys) as avg_sys,
-                AVG(blood_pressure_dia) as avg_dia,
-                AVG(heart_rate) as avg_hr,
-                AVG(blood_sugar) as avg_bs
-            FROM vital_signs
-            WHERE elderly_id = ? 
-            AND measurement_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-            GROUP BY DATE(measurement_date)
-        `, [elderlyId]);
-
-        const [vitalHistoryHR] = await db.query(`
-            SELECT 
-                DATE(recorded_at) as date,
-                AVG(blood_pressure_systolic) as avg_sys,
-                AVG(blood_pressure_diastolic) as avg_dia,
-                AVG(heart_rate) as avg_hr,
-                AVG(blood_sugar_level) as avg_bs
-            FROM health_records
-            WHERE user_id = ? 
-            AND recorded_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-            GROUP BY DATE(recorded_at)
-        `, [elderlyId]);
-
-        // Combine and sort by date
-        const vitalHistoryMap = new Map();
-        
-        [...vitalHistoryVS, ...vitalHistoryHR].forEach(record => {
-            const dateStr = record.date;
-            if (!vitalHistoryMap.has(dateStr) || vitalHistoryMap.get(dateStr).avg_sys === null) {
-                vitalHistoryMap.set(dateStr, record);
-            }
-        });
-
-        const vitalHistory = Array.from(vitalHistoryMap.values())
-            .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        // Format response
-        const response = {
-            elderly: {
-                id: elderly.id,
-                full_name: elderly.full_name,
-                age: age,
-                phone: elderly.phone,
-                address: elderly.address
-            },
-            vitals: vitals || {
-                blood_pressure_sys: null,
-                blood_pressure_dia: null,
-                heart_rate: null,
-                blood_sugar: null,
-                temperature: null,
-                weight: null
-            },
-            medications: medications.map(med => ({
-                id: med.id,
-                name: med.medication_name,
-                dose: med.dose,
-                frequency: med.frequency,
-                time: med.times,
-                status: med.status,
-                notes: med.notes
-            })),
-            activities: activities.map(act => ({
-                time: new Date(act.activity_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-                type: act.activity_type,
-                value: `${act.value} ${act.unit}`,
-                description: act.description
-            })),
-            alerts: alerts.map(alert => ({
-                id: alert.id,
-                type: alert.alert_type,
-                message: alert.message,
-                created_at: getRelativeTime(alert.created_at),
-                created_by: alert.created_by_name,
-                is_dismissed: alert.is_dismissed
-            })),
-            family_contacts: familyContacts,
-            vital_history: vitalHistory
-        };
+            LEFT JOIN medicine_logs ml ON m.id = ml.medicine_id
+            WHERE m.is_active = TRUE 
+            AND DATE(ml.taken_at) = CURDATE()
+        `);
 
         res.json({
             success: true,
-            data: response
+            data: {
+                alertCounts,
+                vitalViolations,
+                inactiveElderly,
+                medicationStats: medicationStats[0]
+            }
         });
     } catch (error) {
-        console.error('Error getting elderly monitoring:', error);
+        console.error('Get monitoring dashboard error:', error);
         res.status(500).json({
             success: false,
             message: 'Gagal mengambil data monitoring'
@@ -323,249 +96,114 @@ const getElderlyMonitoring = async (req, res) => {
     }
 };
 
-// Add vital signs
-const addVitalSigns = async (req, res) => {
+// Get all monitoring alerts with filters
+const getMonitoringAlerts = async (req, res) => {
     try {
-        const { elderlyId } = req.params;
-        const {
-            blood_pressure_sys,
-            blood_pressure_dia,
-            heart_rate,
-            blood_sugar,
-            temperature,
-            weight,
-            notes
-        } = req.body;
-
-        // Validate elderly exists
-        const [elderly] = await db.query(
-            'SELECT id FROM users WHERE id = ? AND role = "elderly"',
-            [elderlyId]
-        );
-
-        if (elderly.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Lansia tidak ditemukan'
-            });
-        }
-
-        // Insert vital signs
-        const [result] = await db.query(`
-            INSERT INTO vital_signs 
-            (elderly_id, measurement_date, blood_pressure_sys, blood_pressure_dia, 
-             heart_rate, blood_sugar, temperature, weight, notes, recorded_by)
-            VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
+        const { 
+            page = 1, 
+            limit = 10, 
+            alertType, 
+            category,
+            isDismissed,
             elderlyId,
-            blood_pressure_sys,
-            blood_pressure_dia,
-            heart_rate,
-            blood_sugar || null,
-            temperature || null,
-            weight || null,
-            notes || null,
-            req.user.id
-        ]);
-
-        // Check for abnormal values and create alerts
-        const alerts = [];
+            startDate,
+            endDate 
+        } = req.query;
         
-        if (blood_pressure_sys > 140 || blood_pressure_dia > 90) {
-            alerts.push({
-                type: 'high',
-                message: `Tekanan darah tinggi terdeteksi: ${blood_pressure_sys}/${blood_pressure_dia} mmHg`
-            });
+        const offset = (page - 1) * limit;
+        
+        let query = `
+            SELECT 
+                ma.*,
+                u.full_name as elderly_name,
+                u.phone as elderly_phone,
+                creator.full_name as created_by_name,
+                dismisser.full_name as dismissed_by_name
+            FROM monitoring_alerts ma
+            JOIN users u ON ma.elderly_id = u.id
+            JOIN users creator ON ma.created_by = creator.id
+            LEFT JOIN users dismisser ON ma.dismissed_by = dismisser.id
+            WHERE 1=1
+        `;
+        
+        let countQuery = `
+            SELECT COUNT(*) as total 
+            FROM monitoring_alerts ma
+            WHERE 1=1
+        `;
+        
+        const params = [];
+        const countParams = [];
+        
+        // Add filters
+        if (alertType) {
+            query += ' AND ma.alert_type = ?';
+            countQuery += ' AND ma.alert_type = ?';
+            params.push(alertType);
+            countParams.push(alertType);
         }
         
-        if (blood_sugar && blood_sugar > 125) {
-            alerts.push({
-                type: 'high',
-                message: `Gula darah tinggi terdeteksi: ${blood_sugar} mg/dL`
-            });
+        if (category) {
+            query += ' AND ma.category = ?';
+            countQuery += ' AND ma.category = ?';
+            params.push(category);
+            countParams.push(category);
         }
         
-        if (heart_rate && (heart_rate < 60 || heart_rate > 100)) {
-            alerts.push({
-                type: 'medium',
-                message: `Detak jantung abnormal: ${heart_rate} bpm`
-            });
+        if (isDismissed !== undefined) {
+            query += ' AND ma.is_dismissed = ?';
+            countQuery += ' AND ma.is_dismissed = ?';
+            params.push(isDismissed === 'true');
+            countParams.push(isDismissed === 'true');
         }
-
-        // Create alerts if any
-        for (const alert of alerts) {
-            await db.query(`
-                INSERT INTO monitoring_alerts (elderly_id, alert_type, message, created_by)
-                VALUES (?, ?, ?, ?)
-            `, [elderlyId, alert.type, alert.message, req.user.id]);
+        
+        if (elderlyId) {
+            query += ' AND ma.elderly_id = ?';
+            countQuery += ' AND ma.elderly_id = ?';
+            params.push(elderlyId);
+            countParams.push(elderlyId);
         }
-
-        // Also insert into health_records for compatibility
-        await db.query(`
-            INSERT INTO health_records 
-            (user_id, blood_pressure_systolic, blood_pressure_diastolic, 
-             heart_rate, blood_sugar_level, temperature, weight, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
-            elderlyId,
-            blood_pressure_sys,
-            blood_pressure_dia,
-            heart_rate || null,
-            blood_sugar || null,
-            temperature || null,
-            weight || null,
-            notes || null
-        ]);
-
+        
+        if (startDate) {
+            query += ' AND DATE(ma.created_at) >= ?';
+            countQuery += ' AND DATE(ma.created_at) >= ?';
+            params.push(startDate);
+            countParams.push(startDate);
+        }
+        
+        if (endDate) {
+            query += ' AND DATE(ma.created_at) <= ?';
+            countQuery += ' AND DATE(ma.created_at) <= ?';
+            params.push(endDate);
+            countParams.push(endDate);
+        }
+        
+        // Add sorting and pagination
+        query += ' ORDER BY ma.created_at DESC LIMIT ? OFFSET ?';
+        params.push(parseInt(limit), parseInt(offset));
+        
+        // Execute queries
+        const [alerts] = await db.query(query, params);
+        const [countResult] = await db.query(countQuery, countParams);
+        const total = countResult[0].total;
+        
         res.json({
             success: true,
-            message: 'Vital signs berhasil dicatat',
             data: {
-                id: result.insertId,
-                alerts_created: alerts.length
+                alerts,
+                pagination: {
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
             }
         });
     } catch (error) {
-        console.error('Error adding vital signs:', error);
+        console.error('Get monitoring alerts error:', error);
         res.status(500).json({
             success: false,
-            message: 'Gagal mencatat vital signs'
-        });
-    }
-};
-
-// Add medication log
-const addMedicationLog = async (req, res) => {
-    try {
-        const { medicationId } = req.params;
-        const { notes } = req.body;
-
-        // Check if medication exists
-        const [medication] = await db.query(
-            'SELECT * FROM medications_monitoring WHERE id = ?',
-            [medicationId]
-        );
-
-        if (medication.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Obat tidak ditemukan'
-            });
-        }
-
-        // Add log
-        await db.query(`
-            INSERT INTO medication_monitoring_logs (medication_id, taken_at, marked_by, notes)
-            VALUES (?, NOW(), ?, ?)
-        `, [medicationId, req.user.id, notes || null]);
-
-        res.json({
-            success: true,
-            message: 'Log obat berhasil dicatat'
-        });
-    } catch (error) {
-        console.error('Error adding medication log:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Gagal mencatat log obat'
-        });
-    }
-};
-
-// Add activity
-const addActivity = async (req, res) => {
-    try {
-        const { elderlyId } = req.params;
-        const { activity_type, value, unit, description } = req.body;
-
-        // Validate elderly exists
-        const [elderly] = await db.query(
-            'SELECT id FROM users WHERE id = ? AND role = "elderly"',
-            [elderlyId]
-        );
-
-        if (elderly.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Lansia tidak ditemukan'
-            });
-        }
-
-        // Insert activity
-        await db.query(`
-            INSERT INTO activities (elderly_id, activity_type, activity_date, value, unit, description, recorded_by)
-            VALUES (?, ?, NOW(), ?, ?, ?, ?)
-        `, [
-            elderlyId,
-            activity_type,
-            value,
-            unit,
-            description || null,
-            req.user.id
-        ]);
-
-        res.json({
-            success: true,
-            message: 'Aktivitas berhasil dicatat'
-        });
-    } catch (error) {
-        console.error('Error adding activity:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Gagal mencatat aktivitas'
-        });
-    }
-};
-
-// Add alert
-const addAlert = async (req, res) => {
-    try {
-        const { elderly_id, alert_type, message } = req.body;
-
-        // Validate elderly exists
-        const [elderly] = await db.query(
-            'SELECT id FROM users WHERE id = ? AND role = "elderly"',
-            [elderly_id]
-        );
-
-        if (elderly.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Lansia tidak ditemukan'
-            });
-        }
-
-        // Insert alert
-        await db.query(`
-            INSERT INTO monitoring_alerts (elderly_id, alert_type, message, created_by)
-            VALUES (?, ?, ?, ?)
-        `, [elderly_id, alert_type, message, req.user.id]);
-
-        // Create notification for family members
-        const [familyMembers] = await db.query(`
-            SELECT family_user_id FROM family_elderly_relations
-            WHERE elderly_user_id = ?
-        `, [elderly_id]);
-
-        for (const family of familyMembers) {
-            await db.query(`
-                INSERT INTO notifications (user_id, type, title, message)
-                VALUES (?, 'monitoring_alert', 'Alert Monitoring', ?)
-            `, [
-                family.family_user_id,
-                `Alert ${alert_type} untuk ${elderly[0].full_name}: ${message}`
-            ]);
-        }
-
-        res.json({
-            success: true,
-            message: 'Alert berhasil ditambahkan'
-        });
-    } catch (error) {
-        console.error('Error adding alert:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Gagal menambahkan alert'
+            message: 'Gagal mengambil data alerts'
         });
     }
 };
@@ -574,19 +212,22 @@ const addAlert = async (req, res) => {
 const dismissAlert = async (req, res) => {
     try {
         const { alertId } = req.params;
-
-        await db.query(`
-            UPDATE monitoring_alerts 
-            SET is_dismissed = TRUE, dismissed_by = ?, dismissed_at = NOW()
-            WHERE id = ?
-        `, [req.user.id, alertId]);
-
+        
+        await db.query(
+            `UPDATE monitoring_alerts 
+             SET is_dismissed = TRUE, 
+                 dismissed_by = ?, 
+                 dismissed_at = NOW() 
+             WHERE id = ?`,
+            [req.user.id, alertId]
+        );
+        
         res.json({
             success: true,
             message: 'Alert berhasil di-dismiss'
         });
     } catch (error) {
-        console.error('Error dismissing alert:', error);
+        console.error('Dismiss alert error:', error);
         res.status(500).json({
             success: false,
             message: 'Gagal dismiss alert'
@@ -594,56 +235,240 @@ const dismissAlert = async (req, res) => {
     }
 };
 
-// Get monitoring summary (for dashboard)
-const getMonitoringSummary = async (req, res) => {
+// Get vital signs trends
+const getVitalSignsTrends = async (req, res) => {
     try {
-        // Get total elderly with critical conditions
-        const [criticalCount] = await db.query(`
-            SELECT COUNT(DISTINCT elderly_id) as count
-            FROM monitoring_alerts
-            WHERE alert_type = 'high' 
-            AND is_dismissed = FALSE
-            AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-        `);
-
-        // Get elderly without recent checkups (>3 days)
-        const [noRecentCheckup] = await db.query(`
-            SELECT COUNT(*) as count
-            FROM users u
-            WHERE u.role = 'elderly'
-            AND NOT EXISTS (
-                SELECT 1 FROM vital_signs vs
-                WHERE vs.elderly_id = u.id
-                AND vs.measurement_date >= DATE_SUB(NOW(), INTERVAL 3 DAY)
-            )
-        `);
-
-        // Get medication adherence rate (last 7 days)
-        const [medicationStats] = await db.query(`
+        const { elderlyId, days = 7 } = req.query;
+        
+        let query = `
             SELECT 
-                COUNT(DISTINCT mm.id) as total_medications,
-                COUNT(DISTINCT mml.medication_id) as taken_medications
-            FROM medications_monitoring mm
-            LEFT JOIN medication_monitoring_logs mml ON mm.id = mml.medication_id
-                AND mml.taken_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            WHERE mm.is_active = TRUE
+                vs.elderly_id,
+                u.full_name as elderly_name,
+                DATE(vs.measurement_date) as date,
+                AVG(vs.blood_pressure_sys) as avg_sys,
+                AVG(vs.blood_pressure_dia) as avg_dia,
+                AVG(vs.heart_rate) as avg_heart_rate,
+                AVG(vs.blood_sugar) as avg_blood_sugar,
+                AVG(vs.oxygen_saturation) as avg_oxygen
+            FROM vital_signs vs
+            JOIN users u ON vs.elderly_id = u.id
+            WHERE vs.measurement_date >= DATE_SUB(NOW(), INTERVAL ? DAY)
+        `;
+        
+        const params = [parseInt(days)];
+        
+        if (elderlyId) {
+            query += ' AND vs.elderly_id = ?';
+            params.push(elderlyId);
+        }
+        
+        query += `
+            GROUP BY vs.elderly_id, DATE(vs.measurement_date)
+            ORDER BY vs.elderly_id, date DESC
+        `;
+        
+        const [trends] = await db.query(query, params);
+        
+        // Group by elderly
+        const groupedTrends = trends.reduce((acc, curr) => {
+            if (!acc[curr.elderly_id]) {
+                acc[curr.elderly_id] = {
+                    elderly_id: curr.elderly_id,
+                    elderly_name: curr.elderly_name,
+                    data: []
+                };
+            }
+            acc[curr.elderly_id].data.push({
+                date: curr.date,
+                avg_sys: parseFloat(curr.avg_sys),
+                avg_dia: parseFloat(curr.avg_dia),
+                avg_heart_rate: parseFloat(curr.avg_heart_rate),
+                avg_blood_sugar: parseFloat(curr.avg_blood_sugar),
+                avg_oxygen: parseFloat(curr.avg_oxygen)
+            });
+            return acc;
+        }, {});
+        
+        res.json({
+            success: true,
+            data: Object.values(groupedTrends)
+        });
+    } catch (error) {
+        console.error('Get vital signs trends error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Gagal mengambil data trend'
+        });
+    }
+};
+
+// Get real-time monitoring data
+const getRealTimeData = async (req, res) => {
+    try {
+        // Get latest vital signs (last hour)
+        const [latestVitals] = await db.query(`
+            SELECT 
+                vs.*,
+                u.full_name as elderly_name,
+                u.profile_image,
+                recorder.full_name as recorded_by_name
+            FROM vital_signs vs
+            JOIN users u ON vs.elderly_id = u.id
+            JOIN users recorder ON vs.recorded_by = recorder.id
+            WHERE vs.measurement_date >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            ORDER BY vs.measurement_date DESC
+            LIMIT 10
         `);
-
-        const adherenceRate = medicationStats[0].total_medications > 0
-            ? Math.round((medicationStats[0].taken_medications / medicationStats[0].total_medications) * 100)
-            : 0;
-
+        
+        // Get latest activities
+        const [latestActivities] = await db.query(`
+            SELECT 
+                a.*,
+                u.full_name as elderly_name,
+                recorder.full_name as recorded_by_name
+            FROM activities a
+            JOIN users u ON a.elderly_id = u.id
+            LEFT JOIN users recorder ON a.recorded_by = recorder.id
+            WHERE a.activity_date >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            ORDER BY a.activity_date DESC
+            LIMIT 10
+        `);
+        
+        // Get latest medicine logs
+        const [latestMedicineLogs] = await db.query(`
+            SELECT 
+                ml.*,
+                m.medicine_name,
+                m.dosage,
+                u.full_name as elderly_name,
+                marker.full_name as marked_by_name
+            FROM medicine_logs ml
+            JOIN medicines m ON ml.medicine_id = m.id
+            JOIN users u ON m.elderly_id = u.id
+            JOIN users marker ON ml.marked_by = marker.id
+            WHERE ml.created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            ORDER BY ml.created_at DESC
+            LIMIT 10
+        `);
+        
         res.json({
             success: true,
             data: {
-                critical_elderly: criticalCount[0].count,
-                no_recent_checkup: noRecentCheckup[0].count,
-                medication_adherence: adherenceRate,
-                alerts_today: await getAlertsToday()
+                latestVitals,
+                latestActivities,
+                latestMedicineLogs,
+                timestamp: new Date()
             }
         });
     } catch (error) {
-        console.error('Error getting monitoring summary:', error);
+        console.error('Get real-time data error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Gagal mengambil data real-time'
+        });
+    }
+};
+
+// Create manual alert
+const createAlert = async (req, res) => {
+    try {
+        const { elderlyId, alertType, category, message, requiresAction, actionDescription } = req.body;
+        
+        const [result] = await db.query(
+            `INSERT INTO monitoring_alerts 
+             (elderly_id, alert_type, category, message, requires_action, action_description, created_by) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [elderlyId, alertType, category, message, requiresAction || false, actionDescription || null, req.user.id]
+        );
+        
+        // Send notification to family members
+        const [familyMembers] = await db.query(`
+            SELECT u.id 
+            FROM users u
+            JOIN family_elderly_relations fer ON u.id = fer.family_user_id
+            WHERE fer.elderly_user_id = ?
+        `, [elderlyId]);
+        
+        for (const family of familyMembers) {
+            await db.query(
+                `INSERT INTO notifications 
+                 (user_id, type, title, message, priority, related_entity, entity_id) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [family.id, 'health_alert', 'Alert Kesehatan', message, alertType, 'monitoring_alerts', result.insertId]
+            );
+        }
+        
+        res.json({
+            success: true,
+            message: 'Alert berhasil dibuat',
+            data: { id: result.insertId }
+        });
+    } catch (error) {
+        console.error('Create alert error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Gagal membuat alert'
+        });
+    }
+};
+
+// Get monitoring summary for export
+const getMonitoringSummary = async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+        
+        // Validate dates
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tanggal mulai dan akhir harus diisi'
+            });
+        }
+        
+        // Get summary data
+        const [summary] = await db.query(`
+            SELECT 
+                COUNT(DISTINCT vs.elderly_id) as total_elderly_monitored,
+                COUNT(vs.id) as total_vital_measurements,
+                AVG(vs.blood_pressure_sys) as avg_sys_all,
+                AVG(vs.blood_pressure_dia) as avg_dia_all,
+                AVG(vs.heart_rate) as avg_heart_rate_all,
+                AVG(vs.blood_sugar) as avg_blood_sugar_all
+            FROM vital_signs vs
+            WHERE DATE(vs.measurement_date) BETWEEN ? AND ?
+        `, [startDate, endDate]);
+        
+        const [alertSummary] = await db.query(`
+            SELECT 
+                alert_type,
+                category,
+                COUNT(*) as count
+            FROM monitoring_alerts
+            WHERE DATE(created_at) BETWEEN ? AND ?
+            GROUP BY alert_type, category
+        `, [startDate, endDate]);
+        
+        const [complianceSummary] = await db.query(`
+            SELECT 
+                ml.status,
+                COUNT(*) as count
+            FROM medicine_logs ml
+            JOIN medicines m ON ml.medicine_id = m.id
+            WHERE DATE(ml.taken_at) BETWEEN ? AND ?
+            GROUP BY ml.status
+        `, [startDate, endDate]);
+        
+        res.json({
+            success: true,
+            data: {
+                period: { startDate, endDate },
+                vitalSummary: summary[0],
+                alertSummary,
+                complianceSummary
+            }
+        });
+    } catch (error) {
+        console.error('Get monitoring summary error:', error);
         res.status(500).json({
             success: false,
             message: 'Gagal mengambil summary monitoring'
@@ -651,43 +476,12 @@ const getMonitoringSummary = async (req, res) => {
     }
 };
 
-// Helper function to get alerts count today
-async function getAlertsToday() {
-    const [result] = await db.query(`
-        SELECT COUNT(*) as count
-        FROM monitoring_alerts
-        WHERE DATE(created_at) = CURDATE()
-    `);
-    return result[0].count;
-}
-
-// Helper function to format relative time
-function getRelativeTime(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) {
-        return `${diffMins} menit lalu`;
-    } else if (diffHours < 24) {
-        return `${diffHours} jam lalu`;
-    } else if (diffDays < 7) {
-        return `${diffDays} hari lalu`;
-    } else {
-        return date.toLocaleDateString('id-ID');
-    }
-}
-
 module.exports = {
-    getElderlyList,
-    getElderlyMonitoring,
-    addVitalSigns,
-    addMedicationLog,
-    addActivity,
-    addAlert,
+    getMonitoringDashboard,
+    getMonitoringAlerts,
     dismissAlert,
+    getVitalSignsTrends,
+    getRealTimeData,
+    createAlert,
     getMonitoringSummary
 };

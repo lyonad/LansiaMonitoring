@@ -249,10 +249,58 @@ const logout = async (req, res) => {
     }
 };
 
+// Check if username is available
+const checkUsername = async (req, res) => {
+    try {
+        const username = req.params.username;
+        
+        const [users] = await db.query(
+            'SELECT id FROM users WHERE username = ?',
+            [username]
+        );
+        
+        res.json({
+            success: true,
+            isAvailable: users.length === 0
+        });
+    } catch (error) {
+        console.error('Check username error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat memeriksa username'
+        });
+    }
+};
+
+// Check if email is available
+const checkEmail = async (req, res) => {
+    try {
+        const email = req.params.email;
+        
+        const [users] = await db.query(
+            'SELECT id FROM users WHERE email = ?',
+            [email]
+        );
+        
+        res.json({
+            success: true,
+            isAvailable: users.length === 0
+        });
+    } catch (error) {
+        console.error('Check email error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat memeriksa email'
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
     getProfile,
     updatePassword,
-    logout
+    logout,
+    checkUsername,
+    checkEmail
 };

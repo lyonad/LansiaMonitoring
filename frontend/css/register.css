@@ -1,0 +1,580 @@
+/* css/register.css - Registration Page Styles */
+
+/* Register Container */
+.register-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-medium);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+}
+
+/* Back Link */
+.back-link {
+    position: absolute;
+    top: var(--spacing-large);
+    left: var(--spacing-large);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-small);
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: var(--spacing-small) var(--spacing-medium);
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.back-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(-4px);
+}
+
+/* Register Box */
+.register-box {
+    background: var(--white);
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-large);
+    width: 100%;
+    max-width: 800px;
+    padding: var(--spacing-xlarge);
+    animation: fadeIn 0.5s ease-in;
+}
+
+/* Progress Steps */
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xlarge);
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--gray);
+    z-index: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-small);
+    position: relative;
+    z-index: 1;
+    flex: 1;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--white);
+    border: 2px solid var(--gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--dark-gray);
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+    transform: scale(1.1);
+}
+
+.step.completed .step-number {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: var(--white);
+}
+
+.step.completed .step-number::after {
+    content: '✓';
+    position: absolute;
+    font-size: 1.2rem;
+}
+
+.step-label {
+    font-size: var(--font-size-small);
+    color: var(--dark-gray);
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+.step.active .step-label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.step.completed .step-label {
+    color: var(--success-color);
+}
+
+/* Form Steps */
+.form-step {
+    display: none;
+    animation: slideIn 0.3s ease-out;
+}
+
+.form-step.active {
+    display: block;
+}
+
+.form-step h2 {
+    color: var(--black);
+    font-size: var(--font-size-xlarge);
+    margin-bottom: var(--spacing-small);
+    text-align: center;
+}
+
+.step-description {
+    color: var(--dark-gray);
+    text-align: center;
+    margin-bottom: var(--spacing-xlarge);
+}
+
+/* Role Cards */
+.role-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-medium);
+    margin-bottom: var(--spacing-xlarge);
+}
+
+.role-card {
+    position: relative;
+    cursor: pointer;
+}
+
+.role-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.role-content {
+    border: 2px solid var(--gray);
+    border-radius: var(--border-radius-large);
+    padding: var(--spacing-large);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.role-card:hover .role-content {
+    border-color: var(--secondary-color);
+    box-shadow: var(--shadow-medium);
+}
+
+.role-card input[type="radio"]:checked + .role-content {
+    border-color: var(--primary-color);
+    background-color: rgba(44, 90, 160, 0.05);
+    box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.2);
+}
+
+.role-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-medium);
+    background-color: var(--light-gray);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.role-card input[type="radio"]:checked + .role-content .role-icon {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.role-content h3 {
+    font-size: var(--font-size-large);
+    margin-bottom: var(--spacing-small);
+    color: var(--black);
+}
+
+.role-content p {
+    color: var(--dark-gray);
+    font-size: var(--font-size-small);
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-medium);
+}
+
+/* Form Navigation */
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--spacing-xlarge);
+    padding-top: var(--spacing-large);
+    border-top: 1px solid var(--gray);
+}
+
+.form-navigation .btn {
+    min-width: 120px;
+}
+
+.form-navigation .btn:only-child {
+    margin-left: auto;
+}
+
+/* Password Strength */
+.password-strength {
+    margin-top: var(--spacing-small);
+}
+
+.password-requirements {
+    list-style: none;
+    margin-top: var(--spacing-small);
+}
+
+.password-requirements li {
+    padding: 4px 0;
+    color: var(--dark-gray);
+    font-size: var(--font-size-small);
+    position: relative;
+    padding-left: 24px;
+}
+
+.password-requirements li::before {
+    content: '○';
+    position: absolute;
+    left: 0;
+    color: var(--gray);
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.password-requirements li.met {
+    color: var(--success-color);
+}
+
+.password-requirements li.met::before {
+    content: '✓';
+    color: var(--success-color);
+}
+
+/* Form Hints */
+.form-hint {
+    display: block;
+    color: var(--dark-gray);
+    font-size: var(--font-size-small);
+    margin-top: 4px;
+}
+
+/* Additional Fields Sections */
+.elderly-fields,
+.medical-fields {
+    margin-top: var(--spacing-xlarge);
+    padding-top: var(--spacing-large);
+    border-top: 1px solid var(--gray);
+}
+
+.elderly-fields h3,
+.medical-fields h3 {
+    font-size: var(--font-size-large);
+    color: var(--black);
+    margin-bottom: var(--spacing-medium);
+}
+
+/* Checkbox Label */
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: var(--spacing-small);
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Verification Summary */
+.verification-summary {
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-large);
+    margin-bottom: var(--spacing-xlarge);
+}
+
+.summary-section {
+    margin-bottom: var(--spacing-large);
+}
+
+.summary-section:last-child {
+    margin-bottom: 0;
+}
+
+.summary-section h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-medium);
+}
+
+.summary-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--spacing-small);
+}
+
+.summary-list dt {
+    font-weight: 500;
+    color: var(--dark-gray);
+}
+
+.summary-list dd {
+    color: var(--black);
+    margin: 0;
+}
+
+/* Success Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: var(--white);
+    border-radius: var(--border-radius-large);
+    padding: var(--spacing-xlarge);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: slideUp 0.3s ease-out;
+}
+
+.modal-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-large);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-icon.success {
+    background-color: rgba(39, 174, 96, 0.1);
+    color: var(--success-color);
+}
+
+.modal-content h2 {
+    font-size: var(--font-size-xlarge);
+    color: var(--black);
+    margin-bottom: var(--spacing-medium);
+}
+
+.modal-content p {
+    color: var(--dark-gray);
+    margin-bottom: var(--spacing-large);
+}
+
+/* Field Error States */
+.form-input.error {
+    border-color: var(--danger-color);
+    background-color: rgba(231, 76, 60, 0.05);
+}
+
+.form-input.error:focus {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+}
+
+/* Loading State for Submit Button */
+#submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .register-box {
+        padding: var(--spacing-large);
+    }
+    
+    .back-link {
+        top: var(--spacing-medium);
+        left: var(--spacing-medium);
+        padding: var(--spacing-small);
+    }
+    
+    .back-link span {
+        display: none;
+    }
+    
+    .progress-steps {
+        margin-bottom: var(--spacing-large);
+    }
+    
+    .step-label {
+        font-size: 0.75rem;
+    }
+    
+    .role-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-navigation {
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+    
+    .form-navigation .btn {
+        width: 100%;
+    }
+    
+    .summary-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-list dt {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    .summary-list dd {
+        margin-bottom: var(--spacing-medium);
+    }
+}
+
+@media (max-width: 480px) {
+    .register-container {
+        padding: var(--spacing-small);
+    }
+    
+    .register-box {
+        padding: var(--spacing-medium);
+    }
+    
+    .progress-steps {
+        gap: 0;
+    }
+    
+    .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: var(--font-size-small);
+    }
+    
+    .step-label {
+        display: none;
+    }
+    
+    .form-step h2 {
+        font-size: var(--font-size-large);
+    }
+}
+
+/* High Contrast Mode */
+body.high-contrast .register-container {
+    background: #000000;
+}
+
+body.high-contrast .register-box {
+    background-color: #000000;
+    border: 3px solid #ffffff;
+}
+
+body.high-contrast .progress-steps::before {
+    background-color: #ffffff;
+}
+
+body.high-contrast .step-number {
+    border: 3px solid #ffffff;
+}
+
+body.high-contrast .step.active .step-number {
+    background-color: #ffff00;
+    color: #000000;
+}
+
+body.high-contrast .role-content {
+    border: 3px solid #ffffff;
+}
+
+body.high-contrast .role-card input[type="radio"]:checked + .role-content {
+    background-color: #ffff00;
+    color: #000000;
+}
+
+body.high-contrast .verification-summary {
+    background-color: #000000;
+    border: 2px solid #ffffff;
+}
+
+/* Print Styles */
+@media print {
+    .back-link,
+    .accessibility-options,
+    .form-navigation,
+    .toggle-password {
+        display: none !important;
+    }
+    
+    .register-box {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .form-step {
+        display: block !important;
+        page-break-inside: avoid;
+    }
+}

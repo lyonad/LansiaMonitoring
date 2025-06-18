@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - LansiaMonitoring</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+    <div class="register-container">
+        <!-- Back to Home -->
+        <a href="index.html" class="back-link" aria-label="Kembali ke beranda">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Kembali</span>
+        </a>
+        
+        <div class="register-box">
+            <!-- Logo -->
+            <div class="logo-section">
+                <div class="logo-placeholder">
+                    <span>LM</span>
+                </div>
+                <h1>LansiaMonitoring</h1>
+                <p class="tagline">Daftar untuk mulai monitoring kesehatan</p>
+            </div>
+            
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Pilih Peran</span>
+                </div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Data Pribadi</span>
+                </div>
+                <div class="step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Akun</span>
+                </div>
+                <div class="step" data-step="4">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Verifikasi</span>
+                </div>
+            </div>
+            
+            <!-- Registration Form -->
+            <form id="registerForm" class="register-form">
+                <!-- Step 1: Choose Role -->
+                <div class="form-step active" data-step="1">
+                    <h2>Pilih Peran Anda</h2>
+                    <p class="step-description">Pilih peran yang sesuai dengan kebutuhan Anda</p>
+                    
+                    <div class="role-cards">
+                        <label class="role-card">
+                            <input type="radio" name="role" value="elderly" required>
+                            <div class="role-content">
+                                <div class="role-icon">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <h3>Lansia</h3>
+                                <p>Saya ingin memantau kesehatan saya sendiri</p>
+                            </div>
+                        </label>
+                        
+                        <label class="role-card">
+                            <input type="radio" name="role" value="family" required>
+                            <div class="role-content">
+                                <div class="role-icon">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                <h3>Keluarga</h3>
+                                <p>Saya ingin memantau kesehatan orang tua/keluarga</p>
+                            </div>
+                        </label>
+                        
+                        <label class="role-card">
+                            <input type="radio" name="role" value="medical" required>
+                            <div class="role-content">
+                                <div class="role-icon">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                                    </svg>
+                                </div>
+                                <h3>Tenaga Medis</h3>
+                                <p>Saya dokter/perawat yang merawat pasien lansia</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-primary btn-large" onclick="nextStep()">
+                            Lanjutkan
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Personal Data -->
+                <div class="form-step" data-step="2">
+                    <h2>Informasi Pribadi</h2>
+                    <p class="step-description">Lengkapi data diri Anda</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName" class="form-label">Nama Lengkap *</label>
+                            <input 
+                                type="text" 
+                                id="fullName" 
+                                name="fullName" 
+                                class="form-input" 
+                                required 
+                                aria-required="true"
+                            >
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dateOfBirth" class="form-label">Tanggal Lahir *</label>
+                            <input 
+                                type="date" 
+                                id="dateOfBirth" 
+                                name="dateOfBirth" 
+                                class="form-input" 
+                                required 
+                                aria-required="true"
+                            >
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Nomor HP *</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone" 
+                                class="form-input" 
+                                placeholder="08xxxxxxxxxx"
+                                pattern="^(\\+62|62|0)8[1-9][0-9]{6,10}$"
+                                required 
+                                aria-required="true"
+                            >
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bloodType" class="form-label">Golongan Darah</label>
+                            <select id="bloodType" name="bloodType" class="form-input">
+                                <option value="">Pilih golongan darah</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address" class="form-label">Alamat Lengkap</label>
+                        <textarea 
+                            id="address" 
+                            name="address" 
+                            class="form-input" 
+                            rows="3"
+                            placeholder="Jl. Contoh No. 123, RT/RW, Kelurahan, Kecamatan, Kota"
+                        ></textarea>
+                    </div>
+                    
+                    <!-- Additional fields for elderly -->
+                    <div class="elderly-fields" style="display: none;">
+                        <h3>Informasi Kesehatan</h3>
+                        
+                        <div class="form-group">
+                            <label for="medicalConditions" class="form-label">Kondisi Kesehatan</label>
+                            <textarea 
+                                id="medicalConditions" 
+                                name="medicalConditions" 
+                                class="form-input" 
+                                rows="2"
+                                placeholder="Contoh: Hipertensi, Diabetes, dll"
+                            ></textarea>
+                            <span class="form-hint">Pisahkan dengan koma jika lebih dari satu</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="allergies" class="form-label">Alergi</label>
+                            <textarea 
+                                id="allergies" 
+                                name="allergies" 
+                                class="form-input" 
+                                rows="2"
+                                placeholder="Contoh: Seafood, Penisilin, dll"
+                            ></textarea>
+                            <span class="form-hint">Pisahkan dengan koma jika lebih dari satu</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferredHospital" class="form-label">Rumah Sakit Pilihan</label>
+                            <input 
+                                type="text" 
+                                id="preferredHospital" 
+                                name="preferredHospital" 
+                                class="form-input"
+                                placeholder="Nama rumah sakit terdekat atau pilihan Anda"
+                            >
+                        </div>
+                        
+                        <h3>Kontak Darurat</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="emergencyName" class="form-label">Nama Kontak Darurat</label>
+                                <input 
+                                    type="text" 
+                                    id="emergencyName" 
+                                    name="emergencyContactName" 
+                                    class="form-input"
+                                >
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="emergencyPhone" class="form-label">Nomor Kontak Darurat</label>
+                                <input 
+                                    type="tel" 
+                                    id="emergencyPhone" 
+                                    name="emergencyContactPhone" 
+                                    class="form-input"
+                                    placeholder="08xxxxxxxxxx"
+                                >
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="emergencyRelation" class="form-label">Hubungan</label>
+                                <input 
+                                    type="text" 
+                                    id="emergencyRelation" 
+                                    name="emergencyContactRelationship" 
+                                    class="form-input"
+                                    placeholder="Contoh: Anak, Saudara, dll"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional fields for medical staff -->
+                    <div class="medical-fields" style="display: none;">
+                        <h3>Informasi Profesional</h3>
+                        
+                        <div class="form-group">
+                            <label for="licenseNumber" class="form-label">Nomor STR/SIP</label>
+                            <input 
+                                type="text" 
+                                id="licenseNumber" 
+                                name="licenseNumber" 
+                                class="form-input"
+                                placeholder="Nomor surat tanda registrasi"
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="specialization" class="form-label">Spesialisasi</label>
+                            <input 
+                                type="text" 
+                                id="specialization" 
+                                name="specialization" 
+                                class="form-input"
+                                placeholder="Contoh: Dokter Umum, Perawat, Geriatri"
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="workplace" class="form-label">Tempat Praktik</label>
+                            <input 
+                                type="text" 
+                                id="workplace" 
+                                name="workplace" 
+                                class="form-input"
+                                placeholder="Nama rumah sakit atau klinik"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-outline" onclick="previousStep()">
+                            Kembali
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Lanjutkan
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Account Setup -->
+                <div class="form-step" data-step="3">
+                    <h2>Buat Akun Anda</h2>
+                    <p class="step-description">Atur username dan password untuk login</p>
+                    
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username *</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-input" 
+                            required 
+                            pattern="^[A-Za-z0-9_]{3,20}$"
+                            aria-required="true"
+                            aria-describedby="username-hint username-error"
+                        >
+                        <span id="username-hint" class="form-hint">
+                            Minimal 3 karakter, hanya huruf, angka, dan underscore
+                        </span>
+                        <span id="username-error" class="error-message" role="alert"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email *</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-input" 
+                            required 
+                            aria-required="true"
+                            aria-describedby="email-error"
+                        >
+                        <span id="email-error" class="error-message" role="alert"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password *</label>
+                        <div class="password-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-input" 
+                                required 
+                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+                                aria-required="true"
+                                aria-describedby="password-hint password-error"
+                            >
+                            <button 
+                                type="button" 
+                                class="toggle-password" 
+                                aria-label="Tampilkan password"
+                                onclick="togglePasswordVisibility('password')"
+                            >
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                        </div>
+                        <div id="password-hint" class="password-strength">
+                            <p class="form-hint">Password harus memenuhi:</p>
+                            <ul class="password-requirements">
+                                <li data-requirement="length">Minimal 8 karakter</li>
+                                <li data-requirement="uppercase">Minimal 1 huruf besar</li>
+                                <li data-requirement="lowercase">Minimal 1 huruf kecil</li>
+                                <li data-requirement="number">Minimal 1 angka</li>
+                            </ul>
+                        </div>
+                        <span id="password-error" class="error-message" role="alert"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Konfirmasi Password *</label>
+                        <div class="password-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="confirmPassword" 
+                                name="confirmPassword" 
+                                class="form-input" 
+                                required 
+                                aria-required="true"
+                                aria-describedby="confirm-error"
+                            >
+                            <button 
+                                type="button" 
+                                class="toggle-password" 
+                                aria-label="Tampilkan password"
+                                onclick="togglePasswordVisibility('confirmPassword')"
+                            >
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                        </div>
+                        <span id="confirm-error" class="error-message" role="alert"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <span>
+                                Saya setuju dengan 
+                                <a href="#terms" class="link">Syarat & Ketentuan</a> dan 
+                                <a href="#privacy" class="link">Kebijakan Privasi</a>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-outline" onclick="previousStep()">
+                            Kembali
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Lanjutkan
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Verification -->
+                <div class="form-step" data-step="4">
+                    <h2>Verifikasi Data</h2>
+                    <p class="step-description">Periksa kembali data Anda sebelum mendaftar</p>
+                    
+                    <div class="verification-summary">
+                        <div class="summary-section">
+                            <h3>Informasi Akun</h3>
+                            <dl class="summary-list">
+                                <dt>Peran:</dt>
+                                <dd id="summary-role"></dd>
+                                
+                                <dt>Username:</dt>
+                                <dd id="summary-username"></dd>
+                                
+                                <dt>Email:</dt>
+                                <dd id="summary-email"></dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="summary-section">
+                            <h3>Data Pribadi</h3>
+                            <dl class="summary-list">
+                                <dt>Nama Lengkap:</dt>
+                                <dd id="summary-name"></dd>
+                                
+                                <dt>Tanggal Lahir:</dt>
+                                <dd id="summary-dob"></dd>
+                                
+                                <dt>Nomor HP:</dt>
+                                <dd id="summary-phone"></dd>
+                                
+                                <dt>Alamat:</dt>
+                                <dd id="summary-address"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-outline" onclick="previousStep()">
+                            Kembali
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                            <span class="btn-text">Daftar Sekarang</span>
+                            <span class="btn-loading" style="display: none;">
+                                <span class="spinner"></span> Mendaftar...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="form-footer">
+                <p>Sudah punya akun? <a href="login.html" class="link">Masuk di sini</a></p>
+            </div>
+        </div>
+        
+        <!-- Accessibility Options -->
+        <div class="accessibility-options">
+            <h3>Opsi Aksesibilitas</h3>
+            <div class="accessibility-controls">
+                <button onclick="increaseFontSize()" class="accessibility-btn" aria-label="Perbesar teks">
+                    <span>A+</span>
+                </button>
+                <button onclick="decreaseFontSize()" class="accessibility-btn" aria-label="Perkecil teks">
+                    <span>A-</span>
+                </button>
+                <button onclick="toggleHighContrast()" class="accessibility-btn" aria-label="Mode kontras tinggi">
+                    <span>⚫⚪</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-icon success">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h2>Pendaftaran Berhasil!</h2>
+            <p>Akun Anda telah berhasil dibuat. Anda akan dialihkan ke halaman login.</p>
+            <button class="btn btn-primary" onclick="redirectToLogin()">Ke Halaman Login</button>
+        </div>
+    </div>
+    
+    <!-- Alert/Notification -->
+    <div id="alert" class="alert" role="alert" aria-live="polite" style="display: none;">
+        <span class="alert-message"></span>
+        <button class="alert-close" onclick="closeAlert()" aria-label="Tutup notifikasi">&times;</button>
+    </div>
+    
+    <script src="js/register.js"></script>
+    <script src="js/accessibility.js"></script>
+</body>
+</html>

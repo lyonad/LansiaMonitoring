@@ -1,13 +1,15 @@
-// js/monitoring.js - Monitoring page functionality
+// js/monitoring.js - Monitoring functionality
 
 // Global variables
-let currentElderlyId = null;
-let vitalSignsChart = null;
-let activityChart = null;
-let currentMonitoringData = null;
+let autoRefreshInterval = null;
+let isAutoRefresh = true;
+let complianceChart = null;
+let trendsChart = null;
+let currentAlerts = [];
+let elderlyList = [];
 
-// Initialize monitoring page
-function initMonitoring() {
+// Initialize monitoring
+document.addEventListener('DOMContentLoaded', async function() {
     // Check authentication
     if (!window.auth.isAuthenticated()) {
         window.location.href = '../../login.html';
@@ -22,13 +24,20 @@ function initMonitoring() {
 
     // Set user info
     document.getElementById('userName').textContent = user.full_name || user.username;
-    
-    // Load elderly list
-    loadElderlyList();
-    
+
+    // Initialize charts
+    initializeCharts();
+
+    // Load initial data
+    await loadMonitoringDashboard();
+    await loadElderlyList();
+
+    // Start auto refresh
+    startAutoRefresh();
+
     // Setup event listeners
     setupEventListeners();
-}
+});
 
 // Setup event listeners
 function setupEventListeners() {
@@ -37,6 +46,9 @@ function setupEventListeners() {
         document.getElementById('sidebar').classList.toggle('active');
         document.querySelector('.main-content').classList.toggle('sidebar-active');
     });
+
+    // Create alert form
+    document.getElementById('createAlertForm').addEventListener('submit', handleCreateAlert);
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', function(e) {
@@ -47,367 +59,639 @@ function setupEventListeners() {
             document.getElementById('userDropdown').classList.remove('active');
         }
     });
-
-    // Search elderly
-    document.getElementById('elderlySearch').addEventListener('input', function(e) {
-        const search = e.target.value.toLowerCase();
-        const items = document.querySelectorAll('.elderly-item');
-        
-        items.forEach(item => {
-            const name = item.querySelector('.elderly-name').textContent.toLowerCase();
-            if (name.includes(search)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-
-    // Form submissions
-    setupFormHandlers();
 }
 
-// Setup form handlers
-function setupFormHandlers() {
-    // Add alert form
-    document.getElementById('addAlertForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handleAddAlert();
-    });
+// Load monitoring dashboard data
+async function loadMonitoringDashboard() {
+    try {
+        const response = await window.auth.apiRequest('/monitoring/dashboard');
+        
+        if (response.success) {
+            const { alertCounts, vitalViolations, inactiveElderly, medicationStats } = response.data;
+            
+            // Update alert counts
+            updateAlertCounts(alertCounts);
+            
+            // Update vital violations
+            updateVitalViolations(vitalViolations);
+            
+            // Update inactive elderly
+            updateInactiveElderly(inactiveElderly);
+            
+            // Update medication stats
+            updateMedicationStats(medicationStats);
+            
+            // Load alerts
+            await loadAlerts();
+            
+            // Load real-time data
+            await loadRealTimeData();
+        }
+    } catch (error) {
+        console.error('Error loading monitoring dashboard:', error);
+        showToast('Gagal memuat data monitoring', 'error');
+    }
+}
 
-    // Add vitals form
-    document.getElementById('addVitalsForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handleAddVitals();
+// Update alert counts
+function updateAlertCounts(alertCounts) {
+    // Reset counts
+    document.getElementById('criticalCount').textContent = '0';
+    document.getElementById('highCount').textContent = '0';
+    document.getElementById('mediumCount').textContent = '0';
+    document.getElementById('lowCount').textContent = '0';
+    
+    // Update counts
+    alertCounts.forEach(alert => {
+        const countElement = document.getElementById(`${alert.alert_type}Count`);
+        if (countElement) {
+            countElement.textContent = alert.count;
+        }
     });
+}
 
-    // Add activity form
-    document.getElementById('addActivityForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handleAddActivity();
+// Update vital violations
+function updateVitalViolations(violations) {
+    const container = document.getElementById('vitalViolations');
+    
+    if (violations.length === 0) {
+        container.innerHTML = '<p class="no-data">Tidak ada pelanggaran batas vital</p>';
+        return;
+    }
+    
+    container.innerHTML = violations.map(v => `
+        <div class="violation-item ${v.status}">
+            <div class="violation-header">
+                <span class="elderly-name">${v.elderly_name}</span>
+                <span class="violation-time">${formatTime(v.measurement_date)}</span>
+            </div>
+            <div class="violation-details">
+                ${v.blood_pressure_sys ? `
+                    <div class="vital-item ${isVitalCritical('bp_sys', v) ? 'critical' : ''}">
+                        <span class="vital-label">Tekanan Darah:</span>
+                        <span class="vital-value">${v.blood_pressure_sys}/${v.blood_pressure_dia} mmHg</span>
+                    </div>
+                ` : ''}
+                ${v.heart_rate ? `
+                    <div class="vital-item ${isVitalCritical('hr', v) ? 'critical' : ''}">
+                        <span class="vital-label">Detak Jantung:</span>
+                        <span class="vital-value">${v.heart_rate} bpm</span>
+                    </div>
+                ` : ''}
+                ${v.oxygen_saturation ? `
+                    <div class="vital-item ${v.oxygen_saturation < v.oxygen_min ? 'critical' : ''}">
+                        <span class="vital-label">Saturasi Oksigen:</span>
+                        <span class="vital-value">${v.oxygen_saturation}%</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Check if vital is critical
+function isVitalCritical(type, vital) {
+    switch(type) {
+        case 'bp_sys':
+            return vital.blood_pressure_sys > vital.sys_max || vital.blood_pressure_sys < vital.sys_min;
+        case 'bp_dia':
+            return vital.blood_pressure_dia > vital.dia_max || vital.blood_pressure_dia < vital.dia_min;
+        case 'hr':
+            return vital.heart_rate > vital.heart_rate_max || vital.heart_rate < vital.heart_rate_min;
+        default:
+            return false;
+    }
+}
+
+// Update inactive elderly
+function updateInactiveElderly(inactiveList) {
+    const container = document.getElementById('inactiveElderly');
+    
+    if (inactiveList.length === 0) {
+        container.innerHTML = '<p class="no-data">Semua lansia aktif dipantau</p>';
+        return;
+    }
+    
+    container.innerHTML = inactiveList.map(elderly => `
+        <div class="inactive-card">
+            <div class="inactive-header">
+                <h4>${elderly.full_name}</h4>
+                <span class="days-inactive">${elderly.days_since_last || 'Belum pernah'} hari</span>
+            </div>
+            <div class="inactive-info">
+                <p>📱 ${elderly.phone || 'Tidak ada telepon'}</p>
+                <p>📅 Terakhir: ${elderly.last_measurement ? formatDate(elderly.last_measurement) : 'Belum ada data'}</p>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="contactElderly(${elderly.id})">
+                Hubungi
+            </button>
+        </div>
+    `).join('');
+}
+
+// Update medication stats
+function updateMedicationStats(stats) {
+    if (!stats) {
+        stats = {
+            compliance_rate: 0,
+            taken_count: 0,
+            missed_count: 0,
+            postponed_count: 0
+        };
+    }
+    
+    // Update text stats
+    document.getElementById('complianceRate').textContent = `${stats.compliance_rate || 0}%`;
+    document.getElementById('takenCount').textContent = stats.taken_count || 0;
+    document.getElementById('missedCount').textContent = stats.missed_count || 0;
+    
+    // Update chart
+    if (complianceChart) {
+        complianceChart.data.datasets[0].data = [
+            stats.taken_count || 0,
+            stats.missed_count || 0,
+            stats.postponed_count || 0
+        ];
+        complianceChart.update();
+    }
+}
+
+// Load alerts
+async function loadAlerts() {
+    try {
+        const alertType = document.getElementById('alertTypeFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+        
+        const params = new URLSearchParams({
+            isDismissed: 'false',
+            limit: 20
+        });
+        
+        if (alertType) params.append('alertType', alertType);
+        if (category) params.append('category', category);
+        
+        const response = await window.auth.apiRequest(`/monitoring/alerts?${params}`);
+        
+        if (response.success) {
+            currentAlerts = response.data.alerts;
+            updateAlertsTable(currentAlerts);
+        }
+    } catch (error) {
+        console.error('Error loading alerts:', error);
+    }
+}
+
+// Update alerts table
+function updateAlertsTable(alerts) {
+    const tbody = document.getElementById('alertsTableBody');
+    
+    if (alerts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Tidak ada alert aktif</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = alerts.map(alert => `
+        <tr class="alert-row ${alert.alert_type}">
+            <td>${formatDateTime(alert.created_at)}</td>
+            <td>${alert.elderly_name}</td>
+            <td><span class="alert-badge ${alert.alert_type}">${alert.alert_type.toUpperCase()}</span></td>
+            <td>${formatCategory(alert.category)}</td>
+            <td>${alert.message}</td>
+            <td>
+                <button class="btn btn-sm btn-success" onclick="dismissAlert(${alert.id})">
+                    ✓ Dismiss
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Load real-time data
+async function loadRealTimeData() {
+    try {
+        const response = await window.auth.apiRequest('/monitoring/real-time');
+        
+        if (response.success) {
+            updateLiveFeed(response.data);
+        }
+    } catch (error) {
+        console.error('Error loading real-time data:', error);
+    }
+}
+
+// Update live feed
+function updateLiveFeed(data) {
+    const feedContainer = document.getElementById('liveFeed');
+    const allEvents = [];
+    
+    // Process vital signs
+    data.latestVitals.forEach(vital => {
+        allEvents.push({
+            time: new Date(vital.measurement_date),
+            type: 'vital',
+            icon: '💓',
+            title: `Vital Signs - ${vital.elderly_name}`,
+            details: `TD: ${vital.blood_pressure_sys}/${vital.blood_pressure_dia}, HR: ${vital.heart_rate}`,
+            recorder: vital.recorded_by_name
+        });
+    });
+    
+    // Process activities
+    data.latestActivities.forEach(activity => {
+        allEvents.push({
+            time: new Date(activity.activity_date),
+            type: 'activity',
+            icon: getActivityIcon(activity.activity_type),
+            title: `${formatActivityType(activity.activity_type)} - ${activity.elderly_name}`,
+            details: `${activity.value} ${activity.unit}`,
+            recorder: activity.recorded_by_name
+        });
+    });
+    
+    // Process medicine logs
+    data.latestMedicineLogs.forEach(log => {
+        allEvents.push({
+            time: new Date(log.taken_at),
+            type: 'medicine',
+            icon: '💊',
+            title: `Obat ${formatMedicineStatus(log.status)} - ${log.elderly_name}`,
+            details: `${log.medicine_name} ${log.dosage}`,
+            recorder: log.marked_by_name
+        });
+    });
+    
+    // Sort by time (newest first)
+    allEvents.sort((a, b) => b.time - a.time);
+    
+    // Display events
+    if (allEvents.length === 0) {
+        feedContainer.innerHTML = '<p class="no-data">Tidak ada aktivitas terkini</p>';
+        return;
+    }
+    
+    feedContainer.innerHTML = allEvents.slice(0, 10).map(event => `
+        <div class="feed-item ${event.type}">
+            <div class="feed-icon">${event.icon}</div>
+            <div class="feed-content">
+                <div class="feed-header">
+                    <span class="feed-title">${event.title}</span>
+                    <span class="feed-time">${getRelativeTime(event.time)}</span>
+                </div>
+                <p class="feed-details">${event.details}</p>
+                <p class="feed-recorder">Oleh: ${event.recorder || 'System'}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Initialize charts
+function initializeCharts() {
+    // Compliance chart
+    const complianceCtx = document.getElementById('complianceChart').getContext('2d');
+    complianceChart = new Chart(complianceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Diminum', 'Terlewat', 'Ditunda'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: [
+                    'rgba(46, 204, 113, 0.8)',
+                    'rgba(231, 76, 60, 0.8)',
+                    'rgba(241, 196, 15, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Trends chart
+    const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+    trendsChart = new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true
+                }
+            }
+        }
     });
 }
 
 // Load elderly list
 async function loadElderlyList() {
     try {
-        const response = await window.auth.apiRequest('/monitoring/elderly-list');
+        const response = await window.auth.apiRequest('/users?role=elderly&limit=100');
         
         if (response.success) {
-            displayElderlyList(response.data);
+            elderlyList = response.data.users;
+            
+            // Populate select options
+            const alertSelect = document.getElementById('alertElderly');
+            const trendSelect = document.getElementById('trendElderlySelect');
+            
+            elderlyList.forEach(elderly => {
+                const option = `<option value="${elderly.id}">${elderly.full_name}</option>`;
+                alertSelect.innerHTML += option;
+                trendSelect.innerHTML += option;
+            });
+            
+            // Load initial trends
+            loadVitalTrends();
         }
     } catch (error) {
         console.error('Error loading elderly list:', error);
-        displayElderlyList([]);
     }
 }
 
-// Display elderly list
-function displayElderlyList(elderlyList) {
-    const container = document.getElementById('elderlyListContainer');
-    container.innerHTML = '';
-
-    if (elderlyList.length === 0) {
-        container.innerHTML = '<p class="text-center">Tidak ada data lansia</p>';
-        return;
-    }
-
-    elderlyList.forEach(elderly => {
-        const item = document.createElement('div');
-        item.className = 'elderly-item';
-        item.onclick = () => selectElderly(elderly.id);
-        item.innerHTML = `
-            <div class="elderly-name">${elderly.full_name}</div>
-            <div class="elderly-info">
-                <div>📱 ${elderly.phone || 'Tidak ada'}</div>
-                <div>👨‍👩‍👧 ${elderly.family_count || 0} Keluarga</div>
-                <div>🕒 Update: ${elderly.last_vitals || 'Belum ada'}</div>
-            </div>
-        `;
-        container.appendChild(item);
-    });
-}
-
-// Select elderly
-async function selectElderly(elderlyId) {
-    currentElderlyId = elderlyId;
-    
-    // Update active state
-    document.querySelectorAll('.elderly-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    event.currentTarget.classList.add('active');
-
-    // Load monitoring data
-    await loadMonitoringData(elderlyId);
-}
-
-// Load monitoring data
-async function loadMonitoringData(elderlyId) {
+// Load vital trends
+async function loadVitalTrends() {
     try {
-        const response = await window.auth.apiRequest(`/monitoring/elderly/${elderlyId}`);
+        const elderlyId = document.getElementById('trendElderlySelect').value;
+        const params = new URLSearchParams({ days: 7 });
+        if (elderlyId) params.append('elderlyId', elderlyId);
+        
+        const response = await window.auth.apiRequest(`/monitoring/trends/vitals?${params}`);
         
         if (response.success) {
-            currentMonitoringData = response.data;
-            displayMonitoringData(response.data);
+            updateTrendsChart(response.data);
         }
     } catch (error) {
-        console.error('Error loading monitoring data:', error);
-        document.getElementById('monitoringContent').innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">❌</div>
-                <h3>Error Loading Data</h3>
-                <p>Gagal memuat data monitoring. Silakan coba lagi.</p>
-            </div>
-        `;
+        console.error('Error loading vital trends:', error);
     }
 }
 
-// Display monitoring data
-function displayMonitoringData(data) {
-    const content = document.getElementById('monitoringContent');
+// Update trends chart
+function updateTrendsChart(trendsData) {
+    if (!trendsData || trendsData.length === 0) {
+        trendsChart.data.labels = [];
+        trendsChart.data.datasets = [];
+        trendsChart.update();
+        return;
+    }
     
-    // Store current data for charts
-    window.currentMonitoringData = data;
+    // Get unique dates
+    const allDates = new Set();
+    trendsData.forEach(elderly => {
+        elderly.data.forEach(d => allDates.add(d.date));
+    });
+    const dates = Array.from(allDates).sort();
     
-    // Generate HTML content
-    const hasVitals = data.vitals && (data.vitals.blood_pressure_sys || data.vitals.heart_rate);
+    // Prepare datasets
+    const datasets = [];
+    const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
     
-    let html = generateMonitoringHTML(data, hasVitals);
-    content.innerHTML = html;
-
-    // Initialize charts after content is loaded
-    setTimeout(() => {
-        if (data.health_history && data.health_history.length > 0) {
-            initializeVitalSignsChart();
-        }
-        initializeActivityChart();
-    }, 100);
+    trendsData.forEach((elderly, index) => {
+        // Blood pressure systolic
+        datasets.push({
+            label: `${elderly.elderly_name} - Sistolik`,
+            data: dates.map(date => {
+                const dayData = elderly.data.find(d => d.date === date);
+                return dayData ? dayData.avg_sys : null;
+            }),
+            borderColor: colors[index % colors.length],
+            backgroundColor: 'transparent',
+            tension: 0.1
+        });
+    });
+    
+    trendsChart.data.labels = dates.map(d => formatDate(d));
+    trendsChart.data.datasets = datasets;
+    trendsChart.update();
 }
 
-// Generate monitoring HTML
-function generateMonitoringHTML(data, hasVitals) {
-    return `
-        <div class="monitoring-header">
-            <h3>${data.elderly.full_name}</h3>
-            <div class="monitoring-meta">
-                <span>🎂 ${data.elderly.age ? data.elderly.age + ' tahun' : 'Usia tidak diketahui'}</span>
-                <span>📱 ${data.elderly.phone}</span>
-                <span>📍 ${data.elderly.address}</span>
-            </div>
-        </div>
-
-        <div class="monitoring-tabs">
-            <button class="tab-button active" onclick="switchTab('vitals')">Vital Signs</button>
-            <button class="tab-button" onclick="switchTab('medications')">Obat-obatan</button>
-            <button class="tab-button" onclick="switchTab('activities')">Aktivitas</button>
-            <button class="tab-button" onclick="switchTab('alerts')">Alerts</button>
-            <button class="tab-button" onclick="switchTab('contacts')">Kontak</button>
-        </div>
-
-        ${generateVitalsTab(data, hasVitals)}
-        ${generateMedicationsTab(data)}
-        ${generateActivitiesTab(data)}
-        ${generateAlertsTab(data)}
-        ${generateContactsTab(data)}
-    `;
+// Auto refresh functions
+function startAutoRefresh() {
+    if (isAutoRefresh) {
+        autoRefreshInterval = setInterval(() => {
+            loadRealTimeData();
+            loadAlerts();
+        }, 30000); // Refresh every 30 seconds
+    }
 }
 
-// Tab generators
-function generateVitalsTab(data, hasVitals) {
-    return `
-        <div id="vitalsTab" class="tab-content active">
-            ${hasVitals ? generateVitalsContent(data.vitals) : generateEmptyVitals()}
-            ${data.health_history && data.health_history.length > 0 ? generateVitalsChart() : ''}
-        </div>
-    `;
+function toggleAutoRefresh() {
+    isAutoRefresh = !isAutoRefresh;
+    document.getElementById('autoRefreshText').textContent = `Auto Refresh: ${isAutoRefresh ? 'ON' : 'OFF'}`;
+    document.getElementById('autoRefreshIcon').classList.toggle('rotating', isAutoRefresh);
+    
+    if (isAutoRefresh) {
+        startAutoRefresh();
+    } else {
+        clearInterval(autoRefreshInterval);
+    }
 }
 
-function generateMedicationsTab(data) {
-    return `
-        <div id="medicationsTab" class="tab-content">
-            <h4>Jadwal Obat Hari Ini</h4>
-            ${data.medications && data.medications.length > 0 ? 
-                generateMedicationsList(data.medications) : 
-                generateEmptyMedications()}
-        </div>
-    `;
+// Alert functions
+function filterAlerts() {
+    loadAlerts();
 }
 
-function generateActivitiesTab(data) {
-    return `
-        <div id="activitiesTab" class="tab-content">
-            <h4>Aktivitas Hari Ini</h4>
-            ${data.activities && data.activities.length > 0 ? 
-                generateActivitiesList(data.activities) : 
-                generateEmptyActivities()}
-            <div style="margin-top: var(--spacing-large);">
-                <button class="btn btn-primary" onclick="showAddActivityModal(${data.elderly.id})">+ Tambah Aktivitas</button>
-            </div>
-            <div class="chart-section">
-                <h4>Aktivitas Mingguan</h4>
-                <div class="chart-container">
-                    <canvas id="activityChart"></canvas>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function generateAlertsTab(data) {
-    return `
-        <div id="alertsTab" class="tab-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-medium);">
-                <h4>Alerts & Notifikasi</h4>
-                <button class="btn btn-primary btn-small" onclick="showAddAlert()">+ Tambah Alert</button>
-            </div>
-            ${data.alerts && data.alerts.length > 0 ? 
-                generateAlertsList(data.alerts) : 
-                generateEmptyAlerts()}
-        </div>
-    `;
-}
-
-function generateContactsTab(data) {
-    return `
-        <div id="contactsTab" class="tab-content">
-            <h4>Kontak Keluarga</h4>
-            <div class="family-contacts">
-                ${data.family_contacts.map(contact => generateContactCard(contact, 'family')).join('')}
-            </div>
+async function dismissAlert(alertId) {
+    if (confirm('Apakah Anda yakin ingin dismiss alert ini?')) {
+        try {
+            const response = await window.auth.apiRequest(`/monitoring/alerts/${alertId}/dismiss`, {
+                method: 'PUT'
+            });
             
-            ${data.emergency_contacts && data.emergency_contacts.length > 0 ? `
-                <h4 style="margin-top: var(--spacing-large);">Kontak Darurat</h4>
-                <div class="family-contacts">
-                    ${data.emergency_contacts.map(contact => generateContactCard(contact, 'emergency')).join('')}
-                </div>
-            ` : ''}
-        </div>
-    `;
+            if (response.success) {
+                showToast('Alert berhasil di-dismiss', 'success');
+                loadMonitoringDashboard();
+            }
+        } catch (error) {
+            console.error('Error dismissing alert:', error);
+            showToast('Gagal dismiss alert', 'error');
+        }
+    }
 }
 
-// Component generators
-function generateVitalsContent(vitals) {
-    return `
-        <h4>Vital Signs Terakhir ${vitals.recorded_at ? `(${new Date(vitals.recorded_at).toLocaleString('id-ID')})` : ''}</h4>
-        <div class="vital-signs-grid">
-            ${generateVitalCard('Tekanan Darah', `${vitals.blood_pressure_sys}/${vitals.blood_pressure_dia}`, 'bp', vitals.blood_pressure_sys, vitals.blood_pressure_dia)}
-            ${vitals.heart_rate ? generateVitalCard('Detak Jantung', `${vitals.heart_rate} bpm`, 'hr', vitals.heart_rate) : ''}
-            ${vitals.blood_sugar ? generateVitalCard('Gula Darah', `${vitals.blood_sugar} mg/dL`, 'bs', vitals.blood_sugar) : ''}
-            ${vitals.temperature ? generateVitalCard('Suhu Tubuh', `${vitals.temperature}°C`, 'temp', vitals.temperature) : ''}
-        </div>
-        <div style="margin-top: var(--spacing-large);">
-            <button class="btn btn-primary" onclick="showAddVitalsModal(${currentElderlyId})">+ Tambah Data Vital Signs</button>
-        </div>
-    `;
+// Create alert modal functions
+function showCreateAlertModal() {
+    document.getElementById('createAlertModal').style.display = 'flex';
 }
 
-function generateVitalCard(label, value, type, val1, val2) {
-    const status = getVitalStatus(type, val1, val2);
-    const statusText = getVitalStatusText(type, val1, val2);
+function closeCreateAlertModal() {
+    document.getElementById('createAlertModal').style.display = 'none';
+    document.getElementById('createAlertForm').reset();
+    document.getElementById('actionDescGroup').style.display = 'none';
+}
+
+function toggleActionDescription() {
+    const isChecked = document.getElementById('requiresAction').checked;
+    document.getElementById('actionDescGroup').style.display = isChecked ? 'block' : 'none';
+}
+
+async function handleCreateAlert(e) {
+    e.preventDefault();
     
-    return `
-        <div class="vital-card">
-            <div class="vital-label">${label}</div>
-            <div class="vital-value">${value}</div>
-            <div class="vital-status status-${status}">${statusText}</div>
-        </div>
-    `;
-}
-
-// Handle form submissions
-async function handleAddAlert() {
-    const alertData = {
-        elderly_id: document.getElementById('alertElderlyId').value,
-        alert_type: document.getElementById('alertType').value,
-        message: document.getElementById('alertMessage').value
+    const formData = {
+        elderlyId: document.getElementById('alertElderly').value,
+        alertType: document.getElementById('alertType').value,
+        category: document.getElementById('alertCategory').value,
+        message: document.getElementById('alertMessage').value,
+        requiresAction: document.getElementById('requiresAction').checked,
+        actionDescription: document.getElementById('actionDescription').value
     };
-
+    
     try {
         const response = await window.auth.apiRequest('/monitoring/alerts', {
             method: 'POST',
-            body: JSON.stringify(alertData)
+            body: JSON.stringify(formData)
         });
-
+        
         if (response.success) {
-            closeModal('addAlertModal');
-            showToast('Alert berhasil ditambahkan');
-            await loadMonitoringData(currentElderlyId);
+            showToast('Alert berhasil dibuat', 'success');
+            closeCreateAlertModal();
+            loadMonitoringDashboard();
         }
     } catch (error) {
-        console.error('Error adding alert:', error);
-        showToast('Gagal menambahkan alert', 'error');
+        console.error('Error creating alert:', error);
+        showToast('Gagal membuat alert', 'error');
     }
 }
 
-async function handleAddVitals() {
-    const vitalsData = {
-        blood_pressure_sys: parseInt(document.getElementById('bloodPressureSys').value),
-        blood_pressure_dia: parseInt(document.getElementById('bloodPressureDia').value),
-        heart_rate: parseInt(document.getElementById('heartRate').value),
-        blood_sugar: document.getElementById('bloodSugar').value ? parseFloat(document.getElementById('bloodSugar').value) : null,
-        temperature: document.getElementById('temperature').value ? parseFloat(document.getElementById('temperature').value) : null,
-        weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
-        notes: document.getElementById('vitalsNotes').value
+// Helper functions
+function formatTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString('id-ID', { 
+        day: 'numeric', 
+        month: 'short', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+}
+
+function formatCategory(category) {
+    const categories = {
+        'vital_signs': 'Vital Signs',
+        'medication': 'Obat',
+        'appointment': 'Jadwal',
+        'activity': 'Aktivitas',
+        'other': 'Lainnya'
     };
-
-    const elderlyId = document.getElementById('vitalsElderlyId').value;
-
-    try {
-        const response = await window.auth.apiRequest(`/monitoring/elderly/${elderlyId}/vitals`, {
-            method: 'POST',
-            body: JSON.stringify(vitalsData)
-        });
-
-        if (response.success) {
-            closeModal('addVitalsModal');
-            showToast('Data vital signs berhasil ditambahkan');
-            await loadMonitoringData(elderlyId);
-        }
-    } catch (error) {
-        console.error('Error adding vital signs:', error);
-        showToast('Gagal menambahkan vital signs', 'error');
-    }
+    return categories[category] || category;
 }
 
-async function handleAddActivity() {
-    const activityData = {
-        activity_type: document.getElementById('activityType').value,
-        value: parseFloat(document.getElementById('activityValue').value),
-        unit: document.getElementById('activityUnit').value,
-        description: document.getElementById('activityDescription').value
+function formatActivityType(type) {
+    const types = {
+        'steps': 'Langkah',
+        'sleep': 'Tidur',
+        'water': 'Minum Air',
+        'exercise': 'Olahraga',
+        'meal': 'Makan',
+        'social': 'Sosial'
     };
-
-    const elderlyId = document.getElementById('activityElderlyId').value;
-
-    try {
-        const response = await window.auth.apiRequest(`/monitoring/elderly/${elderlyId}/activity`, {
-            method: 'POST',
-            body: JSON.stringify(activityData)
-        });
-
-        if (response.success) {
-            closeModal('addActivityModal');
-            showToast('Aktivitas berhasil ditambahkan');
-            await loadMonitoringData(elderlyId);
-        }
-    } catch (error) {
-        console.error('Error adding activity:', error);
-        showToast('Gagal menambahkan aktivitas', 'error');
-    }
+    return types[type] || type;
 }
 
-// Export functions for global access
-window.monitoringFunctions = {
-    initMonitoring,
-    switchTab,
-    showAddAlert,
-    showAddVitalsModal,
-    showAddActivityModal,
-    markMedicineTaken,
-    dismissAlert,
-    closeModal,
-    toggleNotifications,
-    toggleUserMenu,
-    logout
-};
+function formatMedicineStatus(status) {
+    const statuses = {
+        'taken': 'Diminum',
+        'missed': 'Terlewat',
+        'postponed': 'Ditunda',
+        'skipped': 'Dilewati'
+    };
+    return statuses[status] || status;
+}
+
+function getActivityIcon(type) {
+    const icons = {
+        'steps': '🚶',
+        'sleep': '😴',
+        'water': '💧',
+        'exercise': '🏃',
+        'meal': '🍽️',
+        'social': '👥'
+    };
+    return icons[type] || '📊';
+}
+
+function getRelativeTime(date) {
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    
+    if (minutes < 1) return 'Baru saja';
+    if (minutes < 60) return `${minutes} menit lalu`;
+    if (hours < 24) return `${hours} jam lalu`;
+    return formatDateTime(date);
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+    // Implementation sama dengan dashboard.js
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Notification functions
+function toggleNotifications() {
+    document.getElementById('notificationDropdown').classList.toggle('active');
+}
+
+function toggleUserMenu() {
+    document.getElementById('userDropdown').classList.toggle('active');
+}
+
+// Contact elderly placeholder
+function contactElderly(elderlyId) {
+    // This would implement actual contact functionality
+    showToast('Fitur kontak akan segera tersedia', 'info');
+}
+
+// Refresh vital violations
+function refreshVitalViolations() {
+    loadMonitoringDashboard();
+    showToast('Data vital diperbarui', 'success');
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+});

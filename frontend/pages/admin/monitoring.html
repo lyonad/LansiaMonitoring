@@ -8,434 +8,7 @@
     <link rel="stylesheet" href="../../css/accessibility.css">
     <link rel="stylesheet" href="../../css/dashboard.css">
     <link rel="stylesheet" href="../../css/admin.css">
-    <style>
-        /* Monitoring specific styles */
-        .monitoring-container {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: var(--spacing-large);
-            min-height: calc(100vh - 150px);
-        }
-
-        .elderly-list {
-            background-color: var(--white);
-            border-radius: var(--border-radius-large);
-            padding: var(--spacing-large);
-            box-shadow: var(--shadow-small);
-            max-height: calc(100vh - 200px);
-            overflow-y: auto;
-        }
-
-        .elderly-search {
-            margin-bottom: var(--spacing-medium);
-        }
-
-        .elderly-item {
-            padding: var(--spacing-medium);
-            margin-bottom: var(--spacing-small);
-            background-color: var(--light-gray);
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .elderly-item:hover {
-            background-color: var(--gray);
-            transform: translateX(5px);
-        }
-
-        .elderly-item.active {
-            background-color: rgba(44, 90, 160, 0.1);
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .elderly-name {
-            font-weight: 600;
-            color: var(--black);
-            margin-bottom: 4px;
-        }
-
-        .elderly-info {
-            font-size: var(--font-size-small);
-            color: var(--dark-gray);
-        }
-
-        .monitoring-content {
-            background-color: var(--white);
-            border-radius: var(--border-radius-large);
-            padding: var(--spacing-large);
-            box-shadow: var(--shadow-small);
-            overflow-y: auto;
-            max-height: calc(100vh - 200px);
-        }
-
-        .monitoring-header {
-            border-bottom: 1px solid var(--gray);
-            padding-bottom: var(--spacing-medium);
-            margin-bottom: var(--spacing-large);
-        }
-
-        .monitoring-header h3 {
-            margin: 0 0 var(--spacing-small) 0;
-            color: var(--black);
-        }
-
-        .monitoring-meta {
-            display: flex;
-            gap: var(--spacing-large);
-            font-size: var(--font-size-small);
-            color: var(--dark-gray);
-        }
-
-        .monitoring-tabs {
-            display: flex;
-            gap: var(--spacing-small);
-            margin-bottom: var(--spacing-large);
-            border-bottom: 2px solid var(--gray);
-        }
-
-        .tab-button {
-            padding: var(--spacing-medium) var(--spacing-large);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--dark-gray);
-            position: relative;
-            transition: color 0.3s ease;
-        }
-
-        .tab-button:hover {
-            color: var(--primary-color);
-        }
-
-        .tab-button.active {
-            color: var(--primary-color);
-        }
-
-        .tab-button.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: var(--primary-color);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .vital-signs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-medium);
-            margin-bottom: var(--spacing-large);
-        }
-
-        .vital-card {
-            background-color: var(--light-gray);
-            padding: var(--spacing-medium);
-            border-radius: var(--border-radius);
-            text-align: center;
-        }
-
-        .vital-label {
-            font-size: var(--font-size-small);
-            color: var(--dark-gray);
-            margin-bottom: var(--spacing-small);
-        }
-
-        .vital-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--black);
-        }
-
-        .vital-status {
-            font-size: var(--font-size-small);
-            margin-top: var(--spacing-small);
-        }
-
-        .status-normal { color: var(--success-color); }
-        .status-warning { color: var(--warning-color); }
-        .status-danger { color: var(--danger-color); }
-
-        .medication-list {
-            margin-bottom: var(--spacing-large);
-        }
-
-        .medication-item {
-            background-color: var(--light-gray);
-            padding: var(--spacing-medium);
-            margin-bottom: var(--spacing-medium);
-            border-radius: var(--border-radius);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .medication-info h4 {
-            margin: 0 0 var(--spacing-small) 0;
-            color: var(--black);
-        }
-
-        .medication-details {
-            font-size: var(--font-size-small);
-            color: var(--dark-gray);
-        }
-
-        .medication-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: var(--font-size-small);
-        }
-
-        .status-taken {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: var(--success-color);
-        }
-
-        .status-pending {
-            background-color: rgba(241, 196, 15, 0.2);
-            color: var(--warning-color);
-        }
-
-        .activity-timeline {
-            position: relative;
-            padding-left: 30px;
-        }
-
-        .activity-timeline::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: var(--gray);
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: var(--spacing-large);
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: -26px;
-            top: 4px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            border: 3px solid var(--white);
-            box-shadow: var(--shadow-small);
-        }
-
-        .timeline-content {
-            background-color: var(--light-gray);
-            padding: var(--spacing-medium);
-            border-radius: var(--border-radius);
-        }
-
-        .timeline-time {
-            font-size: var(--font-size-small);
-            color: var(--dark-gray);
-            margin-bottom: 4px;
-        }
-
-        .alerts-section {
-            margin-top: var(--spacing-large);
-        }
-
-        .alert-item {
-            padding: var(--spacing-medium);
-            margin-bottom: var(--spacing-medium);
-            border-radius: var(--border-radius);
-            display: flex;
-            align-items: flex-start;
-            gap: var(--spacing-medium);
-        }
-
-        .alert-low {
-            background-color: rgba(52, 152, 219, 0.1);
-            border-left: 4px solid var(--info-color);
-        }
-
-        .alert-medium {
-            background-color: rgba(241, 196, 15, 0.1);
-            border-left: 4px solid var(--warning-color);
-        }
-
-        .alert-high {
-            background-color: rgba(231, 76, 60, 0.1);
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .alert-icon {
-            font-size: 1.5rem;
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-actions {
-            display: flex;
-            gap: var(--spacing-small);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-xlarge);
-            color: var(--dark-gray);
-        }
-
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background-color: var(--white);
-            border-radius: var(--border-radius-large);
-            max-height: 90vh;
-            overflow-y: auto;
-            width: 90%;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--spacing-large);
-            border-bottom: 1px solid var(--gray);
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            color: var(--black);
-        }
-
-        .modal-body {
-            padding: var(--spacing-large);
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: var(--spacing-medium);
-            justify-content: flex-end;
-            padding: var(--spacing-large);
-            border-top: 1px solid var(--gray);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--dark-gray);
-        }
-
-        .form-group {
-            margin-bottom: var(--spacing-medium);
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: var(--spacing-small);
-            font-weight: 500;
-            color: var(--black);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid var(--gray);
-            border-radius: var(--border-radius);
-            font-size: var(--font-size-base);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        textarea.form-input {
-            resize: vertical;
-        }
-
-        .btn-secondary {
-            background-color: var(--gray);
-            color: var(--black);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--dark-gray);
-            color: var(--white);
-        }
-
-        .chart-section {
-            margin-top: var(--spacing-large);
-        }
-
-        .chart-container {
-            background-color: var(--light-gray);
-            padding: var(--spacing-medium);
-            border-radius: var(--border-radius);
-            height: 300px;
-            position: relative;
-        }
-
-        .family-contacts {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: var(--spacing-medium);
-            margin-top: var(--spacing-medium);
-        }
-
-        .contact-card {
-            background-color: var(--light-gray);
-            padding: var(--spacing-medium);
-            border-radius: var(--border-radius);
-        }
-
-        .contact-card h4 {
-            margin: 0 0 var(--spacing-small) 0;
-            color: var(--black);
-        }
-
-        .contact-card p {
-            margin: 4px 0;
-            font-size: var(--font-size-small);
-            color: var(--dark-gray);
-        }
-
-        @media (max-width: 968px) {
-            .monitoring-container {
-                grid-template-columns: 1fr;
-            }
-
-            .elderly-list {
-                max-height: 200px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/monitoring.css">
 </head>
 <body>
     <!-- Skip to main content -->
@@ -467,7 +40,7 @@
                 
                 <div class="user-menu">
                     <button class="user-menu-btn" onclick="toggleUserMenu()">
-                        <img src="../../images/default-avatar.svg" alt="User avatar" class="user-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNlMGUwZTAiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjM1IiByPSIyMCIgZmlsbD0iIzk5OSIvPgogIDxlbGxpcHNlIGN4PSI1MCIgY3k9IjgwIiByeD0iMzUiIHJ5PSIyNSIgZmlsbD0iIzk5OSIvPgo8L3N2Zz4='">
+                        <img src="../../images/default-avatar.svg" alt="User avatar" class="user-avatar">
                         <span class="user-name" id="userName">Admin</span>
                         <span class="dropdown-arrow">▼</span>
                     </button>
@@ -543,808 +116,249 @@
 
     <!-- Main Content -->
     <main class="main-content" id="main-content">
-        <div class="dashboard-header">
-            <h2>Monitoring Kesehatan Lansia</h2>
+        <!-- Monitoring Header with Actions -->
+        <div class="monitoring-header">
+            <div class="header-content">
+                <h2>Monitoring Kesehatan Real-Time</h2>
+                <p class="header-subtitle">Pantau kondisi kesehatan seluruh lansia</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleAutoRefresh()">
+                    <span id="autoRefreshIcon">🔄</span>
+                    <span id="autoRefreshText">Auto Refresh: ON</span>
+                </button>
+                <button class="btn btn-primary" onclick="showCreateAlertModal()">
+                    ⚠️ Buat Alert Manual
+                </button>
+            </div>
         </div>
 
-        <div class="monitoring-container">
-            <!-- Elderly List -->
-            <div class="elderly-list">
-                <h3>Daftar Lansia</h3>
-                <input type="text" class="form-input elderly-search" placeholder="Cari lansia..." id="elderlySearch">
-                <div id="elderlyListContainer">
-                    <!-- Will be populated by JavaScript -->
+        <!-- Alert Summary Cards -->
+        <div class="alert-summary-grid">
+            <div class="alert-card critical">
+                <div class="alert-icon">🚨</div>
+                <div class="alert-content">
+                    <h3>Critical</h3>
+                    <p class="alert-count" id="criticalCount">0</p>
+                    <p class="alert-label">Perlu tindakan segera</p>
+                </div>
+            </div>
+            
+            <div class="alert-card high">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <h3>High</h3>
+                    <p class="alert-count" id="highCount">0</p>
+                    <p class="alert-label">Prioritas tinggi</p>
+                </div>
+            </div>
+            
+            <div class="alert-card medium">
+                <div class="alert-icon">📊</div>
+                <div class="alert-content">
+                    <h3>Medium</h3>
+                    <p class="alert-count" id="mediumCount">0</p>
+                    <p class="alert-label">Perlu perhatian</p>
+                </div>
+            </div>
+            
+            <div class="alert-card low">
+                <div class="alert-icon">ℹ️</div>
+                <div class="alert-content">
+                    <h3>Low</h3>
+                    <p class="alert-count" id="lowCount">0</p>
+                    <p class="alert-label">Informasi</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Monitoring Grid -->
+        <div class="monitoring-grid">
+            <!-- Real-time Feed -->
+            <div class="monitoring-section">
+                <div class="section-header">
+                    <h3>Live Feed - Aktivitas Terkini</h3>
+                    <span class="live-indicator">
+                        <span class="live-dot"></span> LIVE
+                    </span>
+                </div>
+                <div class="live-feed" id="liveFeed">
+                    <div class="feed-loading">
+                        <div class="spinner"></div>
+                        <p>Memuat data real-time...</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Monitoring Content -->
-            <div class="monitoring-content" id="monitoringContent">
-                <div class="empty-state">
-                    <div class="empty-state-icon">👴</div>
-                    <h3>Pilih Lansia</h3>
-                    <p>Pilih lansia dari daftar di sebelah kiri untuk melihat data monitoring</p>
+            <!-- Vital Signs Violations -->
+            <div class="monitoring-section">
+                <div class="section-header">
+                    <h3>Pelanggaran Batas Vital</h3>
+                    <button class="btn btn-sm" onclick="refreshVitalViolations()">↻</button>
                 </div>
+                <div class="violations-list" id="vitalViolations">
+                    <div class="feed-loading">
+                        <div class="spinner"></div>
+                        <p>Memuat data vital...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Table -->
+        <div class="monitoring-section full-width">
+            <div class="section-header">
+                <h3>Daftar Alert Aktif</h3>
+                <div class="section-filters">
+                    <select id="alertTypeFilter" onchange="filterAlerts()">
+                        <option value="">Semua Tipe</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <select id="categoryFilter" onchange="filterAlerts()">
+                        <option value="">Semua Kategori</option>
+                        <option value="vital_signs">Vital Signs</option>
+                        <option value="medication">Medication</option>
+                        <option value="appointment">Appointment</option>
+                        <option value="activity">Activity</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="monitoring-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Lansia</th>
+                            <th>Tipe</th>
+                            <th>Kategori</th>
+                            <th>Pesan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading-cell">Memuat alerts...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Inactive Elderly -->
+        <div class="monitoring-section full-width">
+            <div class="section-header">
+                <h3>Lansia Tidak Aktif</h3>
+                <p class="section-subtitle">Belum ada data vital dalam 3 hari terakhir</p>
+            </div>
+            <div class="inactive-elderly-grid" id="inactiveElderly">
+                <div class="feed-loading">
+                    <div class="spinner"></div>
+                    <p>Memuat data...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medication Compliance -->
+        <div class="monitoring-section">
+            <div class="section-header">
+                <h3>Kepatuhan Obat Hari Ini</h3>
+            </div>
+            <div class="compliance-stats" id="medicationStats">
+                <div class="compliance-chart">
+                    <canvas id="complianceChart"></canvas>
+                </div>
+                <div class="compliance-details">
+                    <div class="stat-item">
+                        <span class="stat-label">Tingkat Kepatuhan</span>
+                        <span class="stat-value" id="complianceRate">--%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Diminum</span>
+                        <span class="stat-value success" id="takenCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Terlewat</span>
+                        <span class="stat-value danger" id="missedCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trends Chart -->
+        <div class="monitoring-section">
+            <div class="section-header">
+                <h3>Trend Vital Signs (7 Hari)</h3>
+                <select id="trendElderlySelect" onchange="loadVitalTrends()">
+                    <option value="">Semua Lansia</option>
+                </select>
+            </div>
+            <div class="trends-chart">
+                <canvas id="trendsChart"></canvas>
             </div>
         </div>
     </main>
 
-    <!-- Modal for Add Alert -->
-    <div id="addAlertModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
+    <!-- Create Alert Modal -->
+    <div class="modal" id="createAlertModal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3>Tambah Alert</h3>
-                <button class="modal-close" onclick="closeModal('addAlertModal')">&times;</button>
+                <h3>Buat Alert Manual</h3>
+                <button class="modal-close" onclick="closeCreateAlertModal()">×</button>
             </div>
-            <form id="addAlertForm" class="modal-body">
-                <input type="hidden" id="alertElderlyId">
+            <form id="createAlertForm">
                 <div class="form-group">
-                    <label for="alertType" class="form-label">Tipe Alert</label>
-                    <select id="alertType" class="form-input" required>
-                        <option value="">Pilih Tipe</option>
-                        <option value="low">Rendah</option>
-                        <option value="medium">Sedang</option>
-                        <option value="high">Tinggi</option>
+                    <label for="alertElderly">Pilih Lansia</label>
+                    <select id="alertElderly" required>
+                        <option value="">-- Pilih Lansia --</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="alertMessage" class="form-label">Pesan Alert</label>
-                    <textarea id="alertMessage" class="form-input" rows="3" required></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addAlertModal')">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for Add Vital Signs -->
-    <div id="addVitalsModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3>Tambah Vital Signs</h3>
-                <button class="modal-close" onclick="closeModal('addVitalsModal')">&times;</button>
-            </div>
-            <form id="addVitalsForm" class="modal-body">
-                <input type="hidden" id="vitalsElderlyId">
-                <div class="form-group">
-                    <label for="bloodPressureSys" class="form-label">Tekanan Darah Sistolik</label>
-                    <input type="number" id="bloodPressureSys" class="form-input" min="50" max="250" required>
-                </div>
-                <div class="form-group">
-                    <label for="bloodPressureDia" class="form-label">Tekanan Darah Diastolik</label>
-                    <input type="number" id="bloodPressureDia" class="form-input" min="30" max="150" required>
-                </div>
-                <div class="form-group">
-                    <label for="heartRate" class="form-label">Detak Jantung (bpm)</label>
-                    <input type="number" id="heartRate" class="form-input" min="30" max="200" required>
-                </div>
-                <div class="form-group">
-                    <label for="bloodSugar" class="form-label">Gula Darah (mg/dL)</label>
-                    <input type="number" id="bloodSugar" class="form-input" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="temperature" class="form-label">Suhu Tubuh (°C)</label>
-                    <input type="number" id="temperature" class="form-input" min="30" max="45" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label for="weight" class="form-label">Berat Badan (kg)</label>
-                    <input type="number" id="weight" class="form-input" min="0" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label for="vitalsNotes" class="form-label">Catatan</label>
-                    <textarea id="vitalsNotes" class="form-input" rows="2"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addVitalsModal')">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for Add Activity -->
-    <div id="addActivityModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Tambah Aktivitas</h3>
-                <button class="modal-close" onclick="closeModal('addActivityModal')">&times;</button>
-            </div>
-            <form id="addActivityForm" class="modal-body">
-                <input type="hidden" id="activityElderlyId">
-                <div class="form-group">
-                    <label for="activityType" class="form-label">Tipe Aktivitas</label>
-                    <select id="activityType" class="form-input" required>
-                        <option value="">Pilih Tipe</option>
-                        <option value="steps">Jalan/Langkah</option>
-                        <option value="exercise">Olahraga</option>
-                        <option value="sleep">Tidur</option>
-                        <option value="meal">Makan</option>
-                        <option value="medicine">Minum Obat</option>
-                        <option value="other">Lainnya</option>
+                    <label for="alertType">Tipe Alert</label>
+                    <select id="alertType" required>
+                        <option value="low">Low - Informasi</option>
+                        <option value="medium">Medium - Perlu Perhatian</option>
+                        <option value="high">High - Prioritas Tinggi</option>
+                        <option value="critical">Critical - Darurat</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="activityValue" class="form-label">Nilai</label>
-                    <input type="number" id="activityValue" class="form-input" min="0" step="0.1" required>
+                    <label for="alertCategory">Kategori</label>
+                    <select id="alertCategory" required>
+                        <option value="vital_signs">Vital Signs</option>
+                        <option value="medication">Medication</option>
+                        <option value="appointment">Appointment</option>
+                        <option value="activity">Activity</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="activityUnit" class="form-label">Unit</label>
-                    <input type="text" id="activityUnit" class="form-input" placeholder="langkah, menit, jam, dll" required>
+                    <label for="alertMessage">Pesan Alert</label>
+                    <textarea id="alertMessage" rows="3" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="activityDescription" class="form-label">Deskripsi</label>
-                    <textarea id="activityDescription" class="form-input" rows="2"></textarea>
+                    <label>
+                        <input type="checkbox" id="requiresAction" onchange="toggleActionDescription()">
+                        Memerlukan Tindakan
+                    </label>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addActivityModal')">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                <div class="form-group" id="actionDescGroup" style="display: none;">
+                    <label for="actionDescription">Deskripsi Tindakan</label>
+                    <textarea id="actionDescription" rows="2"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateAlertModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Buat Alert</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="../../js/auth.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Check authentication
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!window.auth.isAuthenticated()) {
-                window.location.href = '../../login.html';
-                return;
-            }
-
-            const user = window.auth.getUser();
-            if (user.role !== 'admin') {
-                window.location.href = '../user/dashboard.html';
-                return;
-            }
-
-            document.getElementById('userName').textContent = user.full_name || user.username;
-            
-            // Load elderly list
-            loadElderlyList();
-        });
-
-        // Global variables
-        let currentElderlyId = null;
-        let vitalSignsChart = null;
-        let activityChart = null;
-
-        // Menu toggles
-        document.getElementById('menuToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.querySelector('.main-content').classList.toggle('sidebar-active');
-        });
-
-        function toggleNotifications() {
-            document.getElementById('notificationDropdown').classList.toggle('active');
-        }
-
-        function toggleUserMenu() {
-            document.getElementById('userDropdown').classList.toggle('active');
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.notifications')) {
-                document.getElementById('notificationDropdown').classList.remove('active');
-            }
-            if (!e.target.closest('.user-menu')) {
-                document.getElementById('userDropdown').classList.remove('active');
-            }
-        });
-
-        // Logout
-        async function logout() {
-            if (confirm('Apakah Anda yakin ingin keluar?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '../../login.html';
-            }
-        }
-
-        // Load elderly list
-        async function loadElderlyList() {
-            try {
-                const response = await window.auth.apiRequest('/monitoring/elderly-list');
-                
-                if (response.success) {
-                    displayElderlyList(response.data);
-                }
-            } catch (error) {
-                console.error('Error loading elderly list:', error);
-                
-                // Fallback ke data dummy jika API gagal
-                console.log('Using fallback dummy data...');
-                const dummyData = [
-                    { 
-                        id: 4, 
-                        full_name: 'Kakek Suwarno', 
-                        phone: '081234567893', 
-                        family_count: 1, 
-                        last_vitals: '2 jam lalu',
-                        age: 74,
-                        address: 'Jakarta'
-                    },
-                    { 
-                        id: 5, 
-                        full_name: 'Nenek Siti', 
-                        phone: '081234567894', 
-                        family_count: 1, 
-                        last_vitals: '1 hari lalu',
-                        age: 76,
-                        address: 'Jakarta'  
-                    },
-                    { 
-                        id: 6, 
-                        full_name: 'Kakek Ahmad', 
-                        phone: '081234567895', 
-                        family_count: 1, 
-                        last_vitals: '3 jam lalu',
-                        age: 72,
-                        address: 'Bandung'
-                    }
-                ];
-                displayElderlyList(dummyData);
-                
-                // Show warning message
-                const container = document.getElementById('elderlyListContainer');
-                const warning = document.createElement('div');
-                warning.style.cssText = 'background: #fff3cd; color: #856404; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 12px;';
-                warning.textContent = '⚠️ Mode Offline: Data dummy digunakan';
-                container.insertBefore(warning, container.firstChild);
-            }
-        }
-
-        // Display elderly list
-        function displayElderlyList(elderlyList) {
-            const container = document.getElementById('elderlyListContainer');
-            container.innerHTML = '';
-
-            if (elderlyList.length === 0) {
-                container.innerHTML = '<p class="text-center">Tidak ada data lansia</p>';
-                return;
-            }
-
-            elderlyList.forEach(elderly => {
-                const item = document.createElement('div');
-                item.className = 'elderly-item';
-                item.onclick = () => selectElderly(elderly.id);
-                item.innerHTML = `
-                    <div class="elderly-name">${elderly.full_name}</div>
-                    <div class="elderly-info">
-                        <div>📱 ${elderly.phone || 'Tidak ada'}</div>
-                        <div>👨‍👩‍👧 ${elderly.family_count || 0} Keluarga</div>
-                        <div>🕒 Update: ${elderly.last_vitals || 'Belum ada'}</div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Search elderly
-        document.getElementById('elderlySearch').addEventListener('input', function(e) {
-            const search = e.target.value.toLowerCase();
-            const items = document.querySelectorAll('.elderly-item');
-            
-            items.forEach(item => {
-                const name = item.querySelector('.elderly-name').textContent.toLowerCase();
-                if (name.includes(search)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-
-        // Select elderly
-        async function selectElderly(elderlyId) {
-            currentElderlyId = elderlyId;
-            
-            // Update active state
-            document.querySelectorAll('.elderly-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-
-            // Load monitoring data
-            await loadMonitoringData(elderlyId);
-        }
-
-        // Load monitoring data
-        async function loadMonitoringData(elderlyId) {
-            try {
-                const response = await window.auth.apiRequest(`/monitoring/elderly/${elderlyId}`);
-                
-                if (response.success) {
-                    displayMonitoringData(response.data);
-                } else {
-                    throw new Error('Failed to load data');
-                }
-            } catch (error) {
-                console.error('Error loading monitoring data:', error);
-                
-                // Fallback ke data dummy
-                console.log('Using fallback dummy data for monitoring...');
-                const dummyData = {
-                    elderly: {
-                        id: elderlyId,
-                        full_name: elderlyId === 4 ? 'Kakek Suwarno' : elderlyId === 5 ? 'Nenek Siti' : 'Kakek Ahmad',
-                        age: elderlyId === 4 ? 74 : elderlyId === 5 ? 76 : 72,
-                        phone: elderlyId === 4 ? '081234567893' : elderlyId === 5 ? '081234567894' : '081234567895',
-                        address: elderlyId === 6 ? 'Bandung' : 'Jakarta'
-                    },
-                    vitals: {
-                        blood_pressure_sys: 130,
-                        blood_pressure_dia: 85,
-                        heart_rate: 75,
-                        blood_sugar: 110,
-                        temperature: 36.5,
-                        weight: 65.5
-                    },
-                    medications: [
-                        {
-                            id: 1,
-                            name: 'Amlodipine',
-                            medication_name: 'Amlodipine',
-                            dose: '5mg',
-                            frequency: '1x sehari',
-                            time: '08:00',
-                            times: '08:00',
-                            status: 'taken'
-                        },
-                        {
-                            id: 2,
-                            name: 'Metformin',
-                            medication_name: 'Metformin',
-                            dose: '500mg',
-                            frequency: '2x sehari',
-                            time: '08:00,20:00',
-                            times: '08:00,20:00',
-                            status: 'pending'
-                        }
-                    ],
-                    activities: [
-                        { time: '10:00', type: 'Jalan pagi', value: '1500 langkah' },
-                        { time: '08:00', type: 'Minum obat', value: 'Amlodipine' },
-                        { time: '07:30', type: 'Sarapan', value: 'Selesai' }
-                    ],
-                    alerts: [
-                        {
-                            id: 1,
-                            type: 'medium',
-                            message: 'Tekanan darah sedikit tinggi pada pemeriksaan terakhir',
-                            created_at: '2 jam lalu',
-                            is_dismissed: false
-                        }
-                    ],
-                    family_contacts: [
-                        {
-                            name: 'Budi Santoso',
-                            relationship: 'Anak',
-                            phone: '081234567891',
-                            email: 'keluarga1@test.com'
-                        }
-                    ],
-                    vital_history: [
-                        { date: new Date(Date.now() - 6*24*60*60*1000).toISOString().split('T')[0], avg_sys: 120, avg_dia: 80 },
-                        { date: new Date(Date.now() - 5*24*60*60*1000).toISOString().split('T')[0], avg_sys: 125, avg_dia: 82 },
-                        { date: new Date(Date.now() - 4*24*60*60*1000).toISOString().split('T')[0], avg_sys: 130, avg_dia: 85 },
-                        { date: new Date(Date.now() - 3*24*60*60*1000).toISOString().split('T')[0], avg_sys: 128, avg_dia: 83 },
-                        { date: new Date(Date.now() - 2*24*60*60*1000).toISOString().split('T')[0], avg_sys: 132, avg_dia: 86 },
-                        { date: new Date(Date.now() - 1*24*60*60*1000).toISOString().split('T')[0], avg_sys: 130, avg_dia: 85 },
-                        { date: new Date().toISOString().split('T')[0], avg_sys: 129, avg_dia: 84 }
-                    ]
-                };
-                
-                displayMonitoringData(dummyData);
-            }
-        }
-
-        // Display monitoring data
-        function displayMonitoringData(data) {
-            // Store data globally for charts
-            window.currentMonitoringData = data;
-            
-            const content = document.getElementById('monitoringContent');
-            
-            content.innerHTML = `
-                <div class="monitoring-header">
-                    <h3>${data.elderly.full_name}</h3>
-                    <div class="monitoring-meta">
-                        <span>🎂 ${data.elderly.age} tahun</span>
-                        <span>📱 ${data.elderly.phone}</span>
-                        <span>📍 ${data.elderly.address}</span>
-                    </div>
-                </div>
-
-                <div class="monitoring-tabs">
-                    <button class="tab-button active" onclick="switchTab('vitals')">Vital Signs</button>
-                    <button class="tab-button" onclick="switchTab('medications')">Obat-obatan</button>
-                    <button class="tab-button" onclick="switchTab('activities')">Aktivitas</button>
-                    <button class="tab-button" onclick="switchTab('alerts')">Alerts</button>
-                    <button class="tab-button" onclick="switchTab('contacts')">Kontak</button>
-                </div>
-
-                <div id="vitalsTab" class="tab-content active">
-                    <h4>Vital Signs Terakhir</h4>
-                    ${data.vitals && (data.vitals.blood_pressure_sys || data.vitals.blood_pressure_dia) ? `
-                        <div class="vital-signs-grid">
-                            ${data.vitals.blood_pressure_sys ? `
-                                <div class="vital-card">
-                                    <div class="vital-label">Tekanan Darah</div>
-                                    <div class="vital-value">${data.vitals.blood_pressure_sys}/${data.vitals.blood_pressure_dia}</div>
-                                    <div class="vital-status status-${getVitalStatus('bp', data.vitals.blood_pressure_sys, data.vitals.blood_pressure_dia)}">
-                                        ${getVitalStatusText('bp', data.vitals.blood_pressure_sys, data.vitals.blood_pressure_dia)}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            ${data.vitals.heart_rate ? `
-                                <div class="vital-card">
-                                    <div class="vital-label">Detak Jantung</div>
-                                    <div class="vital-value">${data.vitals.heart_rate} bpm</div>
-                                    <div class="vital-status status-${getVitalStatus('hr', data.vitals.heart_rate)}">
-                                        ${getVitalStatusText('hr', data.vitals.heart_rate)}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            ${data.vitals.blood_sugar ? `
-                                <div class="vital-card">
-                                    <div class="vital-label">Gula Darah</div>
-                                    <div class="vital-value">${data.vitals.blood_sugar} mg/dL</div>
-                                    <div class="vital-status status-${getVitalStatus('bs', data.vitals.blood_sugar)}">
-                                        ${getVitalStatusText('bs', data.vitals.blood_sugar)}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            ${data.vitals.temperature ? `
-                                <div class="vital-card">
-                                    <div class="vital-label">Suhu Tubuh</div>
-                                    <div class="vital-value">${data.vitals.temperature}°C</div>
-                                    <div class="vital-status status-normal">Normal</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    ` : '<p>Belum ada data vital signs</p>'}
-                    
-                    <div style="margin-top: var(--spacing-large);">
-                        <button class="btn btn-primary" onclick="showAddVitalsModal()">+ Tambah Vital Signs</button>
-                    </div>
-                    
-                    ${data.vital_history && data.vital_history.length > 0 ? `
-                        <div class="chart-section">
-                            <h4>Grafik Tekanan Darah (7 Hari Terakhir)</h4>
-                            <div class="chart-container">
-                                <canvas id="vitalSignsChart"></canvas>
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-
-                <div id="medicationsTab" class="tab-content">
-                    <h4>Jadwal Obat Hari Ini</h4>
-                    ${data.medications && data.medications.length > 0 ? `
-                        <div class="medication-list">
-                            ${data.medications.map(med => `
-                                <div class="medication-item">
-                                    <div class="medication-info">
-                                        <h4>${med.name || med.medication_name}</h4>
-                                        <div class="medication-details">
-                                            ${med.dose} - ${med.frequency} - Jam ${med.time || med.times}
-                                        </div>
-                                    </div>
-                                    <div class="medication-status status-${med.status}">
-                                        ${med.status === 'taken' ? 'Sudah diminum' : 'Belum diminum'}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<p>Tidak ada jadwal obat hari ini</p>'}
-                </div>
-
-                <div id="activitiesTab" class="tab-content">
-                    <h4>Aktivitas Hari Ini</h4>
-                    ${data.activities && data.activities.length > 0 ? `
-                        <div class="activity-timeline">
-                            ${data.activities.map(activity => `
-                                <div class="timeline-item">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-content">
-                                        <div class="timeline-time">${activity.time}</div>
-                                        <strong>${activity.type}</strong>: ${activity.value}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<p>Belum ada aktivitas tercatat hari ini</p>'}
-                    
-                    <div style="margin-top: var(--spacing-large);">
-                        <button class="btn btn-primary" onclick="showAddActivityModal()">+ Tambah Aktivitas</button>
-                    </div>
-                </div>
-
-                <div id="alertsTab" class="tab-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-medium);">
-                        <h4>Alerts & Notifikasi</h4>
-                        <button class="btn btn-primary btn-small" onclick="showAddAlert()">+ Tambah Alert</button>
-                    </div>
-                    ${data.alerts && data.alerts.length > 0 ? `
-                        <div class="alerts-section">
-                            ${data.alerts.map(alert => `
-                                <div class="alert-item alert-${alert.type}">
-                                    <div class="alert-icon">
-                                        ${alert.type === 'high' ? '🚨' : alert.type === 'medium' ? '⚠️' : 'ℹ️'}
-                                    </div>
-                                    <div class="alert-content">
-                                        <div>${alert.message}</div>
-                                        <div style="font-size: var(--font-size-small); color: var(--dark-gray); margin-top: 4px;">
-                                            ${alert.created_at}
-                                        </div>
-                                    </div>
-                                    ${!alert.is_dismissed ? `
-                                        <div class="alert-actions">
-                                            <button class="btn btn-small" onclick="dismissAlert(${alert.id})">Dismiss</button>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<p>Tidak ada alert aktif</p>'}
-                </div>
-
-                <div id="contactsTab" class="tab-content">
-                    <h4>Kontak Keluarga</h4>
-                    ${data.family_contacts && data.family_contacts.length > 0 ? `
-                        <div class="family-contacts">
-                            ${data.family_contacts.map(contact => `
-                                <div class="contact-card">
-                                    <h4>${contact.name}</h4>
-                                    <p>🏷️ ${contact.relationship}</p>
-                                    <p>📱 ${contact.phone}</p>
-                                    <p>📧 ${contact.email}</p>
-                                    <button class="btn btn-small btn-primary" style="margin-top: var(--spacing-small);" onclick="window.location.href='tel:${contact.phone}'">
-                                        Hubungi
-                                    </button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<p>Tidak ada kontak keluarga terdaftar</p>'}
-                </div>
-            `;
-
-            // Initialize charts after content is loaded
-            setTimeout(() => {
-                initializeVitalSignsChart();
-                initializeActivityChart();
-            }, 100);
-        }
-
-        // Get vital status
-        function getVitalStatus(type, value1, value2) {
-            switch(type) {
-                case 'bp':
-                    if (value1 > 140 || value2 > 90) return 'danger';
-                    if (value1 > 130 || value2 > 85) return 'warning';
-                    return 'normal';
-                case 'hr':
-                    if (value1 > 100 || value1 < 60) return 'warning';
-                    return 'normal';
-                case 'bs':
-                    if (value1 > 125) return 'danger';
-                    if (value1 > 110) return 'warning';
-                    return 'normal';
-                default:
-                    return 'normal';
-            }
-        }
-
-        // Get vital status text
-        function getVitalStatusText(type, value1, value2) {
-            const status = getVitalStatus(type, value1, value2);
-            const statusMap = {
-                normal: 'Normal',
-                warning: 'Perlu Perhatian',
-                danger: 'Tinggi'
-            };
-            return statusMap[status];
-        }
-
-        // Switch tabs
-        function switchTab(tabName) {
-            // Update button states
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Update content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(tabName + 'Tab').classList.add('active');
-        }
-
-        // Initialize vital signs chart
-        function initializeVitalSignsChart() {
-            const ctx = document.getElementById('vitalSignsChart');
-            if (!ctx) return;
-
-            if (vitalSignsChart) {
-                vitalSignsChart.destroy();
-            }
-
-            // Get data from window if available
-            const chartData = window.currentMonitoringData?.vital_history;
-            if (!chartData || chartData.length === 0) return;
-
-            const labels = chartData.map(d => new Date(d.date).toLocaleDateString('id-ID', { weekday: 'short' }));
-            const sysData = chartData.map(d => d.avg_sys);
-            const diaData = chartData.map(d => d.avg_dia);
-
-            vitalSignsChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Sistolik',
-                        data: sysData,
-                        borderColor: 'rgb(255, 99, 132)',
-                        tension: 0.1
-                    }, {
-                        label: 'Diastolik',
-                        data: diaData,
-                        borderColor: 'rgb(54, 162, 235)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        // Initialize activity chart
-        function initializeActivityChart() {
-            // Remove chart for now since we don't have weekly activity data yet
-            return;
-        }
-
-        // Show add alert modal
-        function showAddAlert() {
-            document.getElementById('alertElderlyId').value = currentElderlyId;
-            document.getElementById('addAlertModal').style.display = 'flex';
-        }
-
-        // Close modal
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            document.getElementById('addAlertForm').reset();
-        }
-
-        // Show add vital signs modal
-        function showAddVitalsModal() {
-            document.getElementById('vitalsElderlyId').value = currentElderlyId;
-            document.getElementById('addVitalsModal').style.display = 'flex';
-        }
-
-        // Show add activity modal
-        function showAddActivityModal() {
-            document.getElementById('activityElderlyId').value = currentElderlyId;
-            document.getElementById('addActivityModal').style.display = 'flex';
-        }
-
-        // Add alert form submission
-        document.getElementById('addAlertForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const alertData = {
-                elderly_id: document.getElementById('alertElderlyId').value,
-                alert_type: document.getElementById('alertType').value,
-                message: document.getElementById('alertMessage').value
-            };
-
-            try {
-                const response = await window.auth.apiRequest('/monitoring/alerts', {
-                    method: 'POST',
-                    body: JSON.stringify(alertData)
-                });
-
-                if (response.success) {
-                    closeModal('addAlertModal');
-                    // Reload monitoring data
-                    await loadMonitoringData(currentElderlyId);
-                }
-            } catch (error) {
-                console.error('Error adding alert:', error);
-                alert('Gagal menambahkan alert');
-            }
-        });
-
-        // Add vital signs form submission
-        document.getElementById('addVitalsForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const vitalsData = {
-                blood_pressure_sys: parseInt(document.getElementById('bloodPressureSys').value),
-                blood_pressure_dia: parseInt(document.getElementById('bloodPressureDia').value),
-                heart_rate: parseInt(document.getElementById('heartRate').value),
-                blood_sugar: document.getElementById('bloodSugar').value ? parseFloat(document.getElementById('bloodSugar').value) : null,
-                temperature: document.getElementById('temperature').value ? parseFloat(document.getElementById('temperature').value) : null,
-                weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
-                notes: document.getElementById('vitalsNotes').value
-            };
-
-            try {
-                const response = await window.auth.apiRequest(`/monitoring/elderly/${currentElderlyId}/vitals`, {
-                    method: 'POST',
-                    body: JSON.stringify(vitalsData)
-                });
-
-                if (response.success) {
-                    closeModal('addVitalsModal');
-                    await loadMonitoringData(currentElderlyId);
-                    alert('Vital signs berhasil dicatat');
-                }
-            } catch (error) {
-                console.error('Error adding vital signs:', error);
-                alert('Gagal mencatat vital signs');
-            }
-        });
-
-        // Add activity form submission
-        document.getElementById('addActivityForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const activityData = {
-                activity_type: document.getElementById('activityType').value,
-                value: parseFloat(document.getElementById('activityValue').value),
-                unit: document.getElementById('activityUnit').value,
-                description: document.getElementById('activityDescription').value
-            };
-
-            try {
-                const response = await window.auth.apiRequest(`/monitoring/elderly/${currentElderlyId}/activity`, {
-                    method: 'POST',
-                    body: JSON.stringify(activityData)
-                });
-
-                if (response.success) {
-                    closeModal('addActivityModal');
-                    await loadMonitoringData(currentElderlyId);
-                    alert('Aktivitas berhasil dicatat');
-                }
-            } catch (error) {
-                console.error('Error adding activity:', error);
-                alert('Gagal mencatat aktivitas');
-            }
-        });
-
-        // Dismiss alert
-        async function dismissAlert(alertId) {
-            if (!confirm('Yakin ingin dismiss alert ini?')) return;
-
-            try {
-                const response = await window.auth.apiRequest(`/monitoring/alerts/${alertId}/dismiss`, {
-                    method: 'PUT'
-                });
-
-                if (response.success) {
-                    // Reload monitoring data
-                    await loadMonitoringData(currentElderlyId);
-                }
-            } catch (error) {
-                console.error('Error dismissing alert:', error);
-            }
-        }
-        // Global functions for HTML onclick handlers
-        window.switchTab = switchTab;
-        window.showAddAlert = showAddAlert;
-        window.showAddVitalsModal = showAddVitalsModal;
-        window.showAddActivityModal = showAddActivityModal;
-        window.dismissAlert = dismissAlert;
-        window.closeModal = closeModal;
-    </script>
+    <script src="../../js/monitoring.js"></script>
 </body>
 </html>

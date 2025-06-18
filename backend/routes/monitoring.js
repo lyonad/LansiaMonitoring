@@ -2,55 +2,38 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
-const monitoringController = require('../controllers/monitoringController');
+const {
+    getMonitoringDashboard,
+    getMonitoringAlerts,
+    dismissAlert,
+    getVitalSignsTrends,
+    getRealTimeData,
+    createAlert,
+    getMonitoringSummary
+} = require('../controllers/monitoringController');
 
-// Get elderly list
-router.get('/elderly-list', 
-    authenticateToken, 
-    authorize('admin', 'medical'), 
-    monitoringController.getElderlyList
-);
+// All monitoring routes require authentication and admin/medical role
+router.use(authenticateToken);
 
-// Get monitoring data for specific elderly
-router.get('/elderly/:elderlyId', 
-    authenticateToken, 
-    authorize('admin', 'medical', 'family'), 
-    monitoringController.getElderlyMonitoring
-);
+// Get monitoring dashboard data
+router.get('/dashboard', authorize('admin', 'medical'), getMonitoringDashboard);
 
-// Add health record
-router.post('/elderly/:elderlyId/health',
-    authenticateToken,
-    authorize('admin', 'medical', 'family'),
-    monitoringController.addHealthRecord
-);
+// Get monitoring alerts with filters
+router.get('/alerts', authorize('admin', 'medical'), getMonitoringAlerts);
 
-// Log medicine taken
-router.post('/medicine/:medicineId/log',
-    authenticateToken,
-    authorize('admin', 'medical', 'family', 'elderly'),
-    monitoringController.logMedicine
-);
+// Dismiss an alert
+router.put('/alerts/:alertId/dismiss', authorize('admin', 'medical'), dismissAlert);
 
-// Get health history for charts
-router.get('/elderly/:elderlyId/health-history',
-    authenticateToken,
-    authorize('admin', 'medical', 'family'),
-    monitoringController.getHealthHistory
-);
+// Get vital signs trends
+router.get('/trends/vitals', authorize('admin', 'medical'), getVitalSignsTrends);
 
-// Get activity logs
-router.get('/elderly/:elderlyId/activities',
-    authenticateToken,
-    authorize('admin', 'medical', 'family'),
-    monitoringController.getActivityLogs
-);
+// Get real-time monitoring data
+router.get('/real-time', authorize('admin', 'medical'), getRealTimeData);
 
-// Create alert
-router.post('/alerts',
-    authenticateToken,
-    authorize('admin', 'medical'),
-    monitoringController.createAlert
-);
+// Create manual alert
+router.post('/alerts', authorize('admin', 'medical'), createAlert);
+
+// Get monitoring summary for export
+router.get('/summary', authorize('admin'), getMonitoringSummary);
 
 module.exports = router;
