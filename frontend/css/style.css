@@ -1,5 +1,90 @@
 /* css/style.css - Main stylesheet */
 
+/* Modern CSS Reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Set core body defaults */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make images easier to work with */
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+}
+
+/* Inherit fonts for inputs and buttons */
+input, button, textarea, select {
+    font: inherit;
+}
+
+/* Remove all animations and transitions for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Utility classes */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #000B58;
+    color: white;
+    padding: 8px;
+    z-index: 1001;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -8,20 +93,27 @@
 }
 
 :root {
-    /* Color Scheme */
-    --primary-color: #2c5aa0;
-    --secondary-color: #4a90e2;
-    --success-color: #27ae60;
-    --warning-color: #f39c12;
-    --danger-color: #e74c3c;
-    --info-color: #3498db;
+    /* Color Scheme - New color palette */
+    --primary-color: #003161; /* Biru medium */
+    --primary-color-rgb: 0, 49, 97;
+    --secondary-color: #006A67; /* Teal/hijau laut */
+    --secondary-color-rgb: 0, 106, 103;
+    --accent-color: #FFF4B7; /* Krem/kuning muda */
+    --accent-color-rgb: 255, 244, 183;
+    --dark-blue: #000B58; /* Biru tua gelap */
+    --dark-blue-rgb: 0, 11, 88;
+    
+    --success-color: #006A67; /* Menggunakan teal untuk success */
+    --warning-color: #FFF4B7; /* Menggunakan krem untuk warning */
+    --danger-color: #e74c3c; /* Tetap merah untuk danger */
+    --info-color: #003161; /* Menggunakan biru medium untuk info */
     
     /* Neutral Colors */
     --white: #ffffff;
-    --light-gray: #f5f5f5;
-    --gray: #e0e0e0;
-    --dark-gray: #666666;
-    --black: #333333;
+    --light-gray: #f8f9fa;
+    --gray: #e9ecef;
+    --dark-gray: #495057;
+    --black: #212529;
     
     /* Font Sizes */
     --font-size-base: 16px;
@@ -40,9 +132,9 @@
     --border-radius-large: 12px;
     
     /* Shadows */
-    --shadow-small: 0 2px 4px rgba(0,0,0,0.1);
-    --shadow-medium: 0 4px 8px rgba(0,0,0,0.1);
-    --shadow-large: 0 8px 16px rgba(0,0,0,0.1);
+    --shadow-small: 0 2px 5px rgba(0, 11, 88, 0.08);
+    --shadow-medium: 0 4px 10px rgba(0, 11, 88, 0.1);
+    --shadow-large: 0 8px 20px rgba(0, 11, 88, 0.15);
 }
 
 body {
@@ -60,7 +152,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: var(--spacing-medium);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-color) 100%);
 }
 
 .login-box {
@@ -78,10 +170,12 @@ body {
     margin-bottom: var(--spacing-xlarge);
 }
 
-.logo {
-    width: 80px;
-    height: 80px;
+.logo-img {
+    width: 120px;
+    height: auto;
     margin-bottom: var(--spacing-medium);
+    border-radius: 10px;
+    box-shadow: var(--shadow-medium);
 }
 
 .logo-section h1 {
@@ -128,7 +222,7 @@ body {
 .form-input:focus {
     outline: none;
     border-color: var(--secondary-color);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    box-shadow: 0 0 0 3px rgba(var(--secondary-color-rgb), 0.2);
 }
 
 .form-input:invalid:not(:placeholder-shown) {
@@ -180,7 +274,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #1e3a6f;
+    background-color: var(--secondary-color);
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
 }
@@ -251,14 +345,14 @@ body {
 }
 
 .link {
-    color: var(--primary-color);
+    color: var(--secondary-color);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .link:hover {
-    color: var(--secondary-color);
+    color: var(--primary-color);
     text-decoration: underline;
 }
 
@@ -419,23 +513,6 @@ button:focus,
 a:focus {
     outline: 3px solid var(--secondary-color);
     outline-offset: 2px;
-}
-
-/* Skip to Main Content Link */
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background: var(--primary-color);
-    color: var(--white);
-    padding: 8px;
-    text-decoration: none;
-    border-radius: 0 0 4px 0;
-    z-index: 100;
-}
-
-.skip-link:focus {
-    top: 0;
 }
 
 /* Toast Notifications */

@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: center;
     padding: var(--spacing-medium);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-color) 100%);
     position: relative;
 }
 
@@ -42,6 +42,31 @@
     max-width: 800px;
     padding: var(--spacing-xlarge);
     animation: fadeIn 0.5s ease-in;
+}
+
+/* Logo Section */
+.logo-section {
+    text-align: center;
+    margin-bottom: var(--spacing-xlarge);
+}
+
+.logo-img {
+    width: 120px;
+    height: auto;
+    margin-bottom: var(--spacing-medium);
+    border-radius: 10px;
+    box-shadow: var(--shadow-medium);
+}
+
+.logo-section h1 {
+    color: var(--primary-color);
+    font-size: var(--font-size-xlarge);
+    margin-bottom: var(--spacing-small);
+}
+
+.tagline {
+    color: var(--dark-gray);
+    font-size: var(--font-size-small);
 }
 
 /* Progress Steps */
@@ -88,15 +113,15 @@
 }
 
 .step.active .step-number {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
     color: var(--white);
     transform: scale(1.1);
 }
 
 .step.completed .step-number {
-    background-color: var(--success-color);
-    border-color: var(--success-color);
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
     color: var(--white);
 }
 
@@ -114,12 +139,12 @@
 }
 
 .step.active .step-label {
-    color: var(--primary-color);
+    color: var(--secondary-color);
     font-weight: 600;
 }
 
 .step.completed .step-label {
-    color: var(--success-color);
+    color: var(--primary-color);
 }
 
 /* Form Steps */
@@ -172,14 +197,14 @@
 }
 
 .role-card:hover .role-content {
-    border-color: var(--secondary-color);
+    border-color: var(--accent-color);
     box-shadow: var(--shadow-medium);
 }
 
 .role-card input[type="radio"]:checked + .role-content {
-    border-color: var(--primary-color);
-    background-color: rgba(44, 90, 160, 0.05);
-    box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.2);
+    border-color: var(--secondary-color);
+    background-color: rgba(var(--secondary-color-rgb), 0.05);
+    box-shadow: 0 0 0 3px rgba(var(--secondary-color-rgb), 0.2);
 }
 
 .role-icon {
@@ -195,7 +220,7 @@
 }
 
 .role-card input[type="radio"]:checked + .role-content .role-icon {
-    background-color: var(--primary-color);
+    background-color: var(--secondary-color);
     color: var(--white);
 }
 

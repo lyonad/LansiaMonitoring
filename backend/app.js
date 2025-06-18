@@ -17,7 +17,7 @@ const monitoringRoutes = require('./routes/monitoring'); // MONITORING ROUTE
 
 const app = express();
 
-// Middleware - Updated CORS for localhost
+// Middleware - Updated CORS for all origins
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
@@ -29,14 +29,27 @@ app.use(cors({
             'http://localhost:80',
             'http://localhost:8080',
             'http://localhost:3000',
-            'http://127.0.0.1'
+            'http://127.0.0.1',
+            'http://127.0.0.1:80',
+            'http://127.0.0.1:8080',
+            'http://127.0.0.1:3000',
+            // Allow file:// protocol for local development
+            'null',
+            // Allow full paths
+            'http://localhost/LansiaMonitoring/frontend',
+            'http://127.0.0.1/LansiaMonitoring/frontend'
         ];
         
         // Check if the origin is allowed
-        if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost')) {
+        if (allowedOrigins.includes(origin) || 
+            origin.includes('localhost') || 
+            origin.includes('127.0.0.1') ||
+            origin.startsWith('file://')) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.log('CORS blocked origin:', origin);
+            callback(null, true); // Temporarily allow all origins during development
+            // In production, use: callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
@@ -52,7 +65,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.get('/api', (req, res) => {
     res.json({
         success: true,
-        message: 'LansiaMonitoring API is running',
+        message: 'HEALTHA API is running',
         version: '1.0.0'
     });
 });
@@ -110,7 +123,7 @@ db.getConnection()
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
     console.log(`\n========================================`);
-    console.log(`🚀 LansiaMonitoring Backend Server`);
+    console.log(`🚀 HEALTHA Backend Server`);
     console.log(`========================================`);
     console.log(`✓ Server berjalan pada port ${PORT}`);
     console.log(`✓ API URL: http://localhost:${PORT}/api`);

@@ -39,17 +39,20 @@
 /* Skip links */
 .skip-link {
     position: absolute;
-    top: -40px;
-    left: 0;
+    top: -9999px;
+    left: -9999px;
     background: #000;
     color: #fff;
     padding: 8px;
     z-index: 100;
-    transition: top 0.3s;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .skip-link:focus {
     top: 0;
+    left: 0;
+    opacity: 1;
 }
 
 /* High contrast mode */
