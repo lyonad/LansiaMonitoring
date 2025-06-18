@@ -250,13 +250,13 @@
 /* Full Screen Hero with Background Image */
 .hero-fullscreen {
     min-height: 100vh;
-    background: url('../images/lansia.jpg') no-repeat center center fixed;
+    background: url('../images/asiandoc.jpg') no-repeat center center fixed;
     background-size: cover;
     display: flex;
     align-items: center;
     position: relative;
     overflow: hidden;
-    padding: 100px 0 80px;
+    padding: 120px 0 80px;
 }
 
 .hero-overlay {
@@ -1231,67 +1231,7 @@
     opacity: 1;
 }
 
-/* Accessibility Float Button */
-.accessibility-float {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-}
 
-.accessibility-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background-color: var(--secondary-color);
-    color: var(--white);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-lg);
-    z-index: 999;
-    border: none;
-    cursor: pointer;
-}
-
-.accessibility-toggle:hover {
-    background-color: var(--dark-blue);
-}
-
-.accessibility-panel {
-    position: absolute;
-    bottom: 70px;
-    right: 0;
-    background-color: var(--white);
-    border-radius: var(--border-radius-large);
-    box-shadow: var(--shadow-large);
-    padding: var(--spacing-large);
-    min-width: 200px;
-    display: none;
-}
-
-.accessibility-panel.show {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
-
-.accessibility-panel h3 {
-    font-size: var(--font-size-base);
-    margin-bottom: var(--spacing-medium);
-}
-
-.accessibility-panel .accessibility-btn {
-    background-color: var(--primary-color);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-2) var(--spacing-3);
-    margin: var(--spacing-1);
-    cursor: pointer;
-}
 
 /* Responsive Design */
 @media (max-width: 1024px) {

@@ -152,7 +152,21 @@ body {
     align-items: center;
     justify-content: center;
     padding: var(--spacing-medium);
-    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-color) 100%);
+    position: relative;
+    background: url('../images/loginbg.jpg') no-repeat center center;
+    background-size: cover;
+    z-index: 1;
+}
+
+.login-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0, 11, 88, 0.70) 0%, rgba(0, 49, 97, 0.60) 100%);
+    z-index: -1;
 }
 
 .login-box {
@@ -163,6 +177,8 @@ body {
     max-width: 450px;
     padding: var(--spacing-xlarge);
     animation: fadeIn 0.5s ease-in;
+    position: relative;
+    z-index: 2;
 }
 
 .logo-section {
@@ -401,46 +417,6 @@ body {
     color: inherit;
     padding: 4px 8px;
     line-height: 1;
-}
-
-/* Accessibility Options */
-.accessibility-options {
-    margin-top: var(--spacing-xlarge);
-    padding-top: var(--spacing-large);
-    border-top: 1px solid var(--gray);
-    text-align: center;
-}
-
-.accessibility-options h3 {
-    font-size: var(--font-size-base);
-    color: var(--dark-gray);
-    margin-bottom: var(--spacing-medium);
-}
-
-.accessibility-controls {
-    display: flex;
-    justify-content: center;
-    gap: var(--spacing-small);
-}
-
-.accessibility-btn {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--gray);
-    background: var(--white);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: var(--font-size-base);
-    font-weight: bold;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.accessibility-btn:hover {
-    border-color: var(--primary-color);
-    background-color: var(--light-gray);
 }
 
 /* Animations */

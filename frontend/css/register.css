@@ -7,8 +7,21 @@
     align-items: center;
     justify-content: center;
     padding: var(--spacing-medium);
-    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-color) 100%);
     position: relative;
+    background: url('../images/registerbg.jpg') no-repeat center center;
+    background-size: cover;
+    z-index: 1;
+}
+
+.register-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0, 11, 88, 0.70) 0%, rgba(0, 49, 97, 0.60) 100%);
+    z-index: -1;
 }
 
 /* Back Link */
@@ -26,6 +39,7 @@
     padding: var(--spacing-small) var(--spacing-medium);
     border-radius: var(--border-radius);
     background-color: rgba(255, 255, 255, 0.1);
+    z-index: 2;
 }
 
 .back-link:hover {
@@ -42,6 +56,8 @@
     max-width: 800px;
     padding: var(--spacing-xlarge);
     animation: fadeIn 0.5s ease-in;
+    position: relative;
+    z-index: 2;
 }
 
 /* Logo Section */
@@ -547,47 +563,9 @@
     }
 }
 
-/* High Contrast Mode */
-body.high-contrast .register-container {
-    background: #000000;
-}
-
-body.high-contrast .register-box {
-    background-color: #000000;
-    border: 3px solid #ffffff;
-}
-
-body.high-contrast .progress-steps::before {
-    background-color: #ffffff;
-}
-
-body.high-contrast .step-number {
-    border: 3px solid #ffffff;
-}
-
-body.high-contrast .step.active .step-number {
-    background-color: #ffff00;
-    color: #000000;
-}
-
-body.high-contrast .role-content {
-    border: 3px solid #ffffff;
-}
-
-body.high-contrast .role-card input[type="radio"]:checked + .role-content {
-    background-color: #ffff00;
-    color: #000000;
-}
-
-body.high-contrast .verification-summary {
-    background-color: #000000;
-    border: 2px solid #ffffff;
-}
-
 /* Print Styles */
 @media print {
     .back-link,
-    .accessibility-options,
     .form-navigation,
     .toggle-password {
         display: none !important;

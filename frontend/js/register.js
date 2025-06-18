@@ -571,23 +571,3 @@ function announceStepChange(stepNumber) {
     }, 1000);
 }
 
-// Accessibility functions (if not loaded from accessibility.js)
-if (typeof increaseFontSize === 'undefined') {
-    window.increaseFontSize = function() {
-        const currentSize = parseInt(getComputedStyle(document.documentElement).fontSize);
-        if (currentSize < 24) {
-            document.documentElement.style.fontSize = (currentSize + 2) + 'px';
-        }
-    };
-    
-    window.decreaseFontSize = function() {
-        const currentSize = parseInt(getComputedStyle(document.documentElement).fontSize);
-        if (currentSize > 12) {
-            document.documentElement.style.fontSize = (currentSize - 2) + 'px';
-        }
-    };
-    
-    window.toggleHighContrast = function() {
-        document.body.classList.toggle('high-contrast');
-    };
-}

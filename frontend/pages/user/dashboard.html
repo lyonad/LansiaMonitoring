@@ -244,22 +244,10 @@
         </div>
     </main>
 
-    <!-- Accessibility Controls -->
-    <div class="accessibility-floating">
-        <button class="accessibility-toggle" onclick="toggleAccessibilityMenu()" aria-label="Accessibility options">
-            ♿
-        </button>
-        <div class="accessibility-menu" id="accessibilityMenu">
-            <button onclick="increaseFontSize()">A+</button>
-            <button onclick="decreaseFontSize()">A-</button>
-            <button onclick="toggleHighContrast()">⚫⚪</button>
-            <button onclick="toggleDyslexiaFont()">Dys</button>
-        </div>
-    </div>
+
 
     <script src="../../js/auth.js"></script>
     <script src="../../js/dashboard.js"></script>
-    <script src="../../js/accessibility.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Initialize dashboard
@@ -303,11 +291,6 @@
             dropdown.classList.toggle('active');
         }
 
-        function toggleAccessibilityMenu() {
-            const menu = document.getElementById('accessibilityMenu');
-            menu.classList.toggle('active');
-        }
-
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.notifications')) {
@@ -315,9 +298,6 @@
             }
             if (!e.target.closest('.user-menu')) {
                 document.getElementById('userDropdown').classList.remove('active');
-            }
-            if (!e.target.closest('.accessibility-floating')) {
-                document.getElementById('accessibilityMenu').classList.remove('active');
             }
         });
 

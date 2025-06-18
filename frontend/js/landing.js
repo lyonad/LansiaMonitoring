@@ -137,24 +137,7 @@ document.querySelectorAll('.feature-card, .testimonial-card, .pricing-card, .ste
     observer.observe(el);
 });
 
-// Accessibility Panel Toggle
-const accessibilityToggle = document.querySelector('.accessibility-toggle');
-const accessibilityPanel = document.querySelector('.accessibility-panel');
 
-accessibilityToggle.addEventListener('click', () => {
-    accessibilityPanel.classList.toggle('show');
-    accessibilityToggle.setAttribute('aria-expanded', accessibilityPanel.classList.contains('show'));
-});
-
-// Close accessibility panel when clicking outside
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.accessibility-float')) {
-        accessibilityPanel.classList.remove('show');
-        accessibilityToggle.setAttribute('aria-expanded', 'false');
-    }
-});
-
-// Note: Accessibility functions have been moved to accessibility.js
 
 // Form validation for demo request
 const demoForm = document.getElementById('demo-form');
@@ -265,12 +248,7 @@ document.addEventListener('keydown', (e) => {
         navToggle.focus();
     }
     
-    // Close accessibility panel with Escape
-    if (e.key === 'Escape' && accessibilityPanel.classList.contains('show')) {
-        accessibilityPanel.classList.remove('show');
-        accessibilityToggle.setAttribute('aria-expanded', 'false');
-        accessibilityToggle.focus();
-    }
+
 });
 
 // Add loading screen
