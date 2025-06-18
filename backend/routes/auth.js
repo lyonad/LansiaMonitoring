@@ -169,4 +169,65 @@ router.post('/forgot-password', [
     });
 });
 
+router.post('/change-password',
+    authenticateToken,
+    [
+        body('oldPassword').notEmpty().withMessage('Password lama harus diisi'),
+        body('newPassword')
+            .isLength({ min: 8 }).withMessage('Password minimal 8 karakter')
+            .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+            .withMessage('Password harus mengandung huruf besar, huruf kecil, angka, dan karakter spesial')
+    ],
+    validate,
+    authController.changePassword
+);
+
+// Session management
+router.get('/sessions', authenticateToken, authController.getSessions);
+router.delete('/sessions/:sessionId', authenticateToken, authController.revokeSession);
+router.post('/sessions/revoke-all', authenticateToken, authController.revokeAllSessions);
+
+// Two-factor authentication
+router.post('/2fa/setup', authenticateToken, authController.setup2FA);
+router.post('/2fa/verify', authenticateToken, authController.verify2FA);
+router.post('/2fa/disable', authenticateToken, authController.disable2FA);
+
+// Refresh token
+router.post('/refresh', authController.refreshToken);
+
+// Password reset
+router.post('/forgot-password', 
+    [
+        body('email').isEmail().withMessage('Email tidak valid')
+    ],
+    validate,
+    authController.requestPasswordReset
+);
+
+router.post('/reset-password',
+    [
+        body('token').notEmpty().withMessage('Token diperlukan'),
+        body('password')
+            .isLength({ min: 8 }).withMessage('Password minimal 8 karakter')
+            .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+            .withMessage('Password harus mengandung huruf besar, huruf kecil, angka, dan karakter spesial')
+    ],
+    validate,
+    authController.resetPasswordWithToken
+);
+
+// Verify email
+router.post('/verify-email',
+    [
+        body('token').notEmpty().withMessage('Token verifikasi diperlukan')
+    ],
+    validate,
+    authController.verifyEmail
+);
+
+router.post('/resend-verification', 
+    authenticateToken, 
+    authController.resendVerificationEmail
+);
+
 module.exports = router;

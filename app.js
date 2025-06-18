@@ -55,11 +55,36 @@ app.use((req, res) => {
     });
 });
 
+// Database connection test
+const db = require('./config/database');
+db.getConnection()
+    .then(connection => {
+        console.log('✓ Database connected successfully');
+        connection.release();
+    })
+    .catch(err => {
+        console.error('✗ Database connection failed:', err.message);
+    });
+
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server berjalan pada port ${PORT}`);
-    console.log(`http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+    console.log(`\n========================================`);
+    console.log(`🚀 HEALTHA Backend Server`);
+    console.log(`========================================`);
+    console.log(`✓ Server berjalan pada port ${PORT}`);
+    console.log(`✓ API URL: http://localhost:${PORT}/api`);
+    console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`========================================\n`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
 });
 
 // Schedule cron jobs for medicine reminders

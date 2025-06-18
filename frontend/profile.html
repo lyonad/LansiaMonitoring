@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya - LansiaMonitoring</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+
+<body>
+    <!-- Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <span class="hamburger"></span>
+                </button>
+                <h1 class="header-title">LansiaMonitoring</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="notifications">
+                    <button class="notification-btn" aria-label="Notifications" onclick="toggleNotifications()">
+                        <span class="notification-icon">🔔</span>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <h3>Notifikasi</h3>
+                        <div class="notification-list">
+                            <p class="no-notifications">Tidak ada notifikasi</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" onclick="toggleUserMenu()">
+                        <img src="../../images/default-avatar.svg" alt="User avatar" class="user-avatar" id="headerAvatar">
+                        <span class="user-name" id="userName">User</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">👤 Profil Saya</a>
+                        <a href="settings.html" class="dropdown-item">⚙️ Pengaturan</a>
+                        <button onclick="logout()" class="dropdown-item logout-btn">🚪 Keluar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="pages/admin/dashboard.html" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item" id="navUsers">
+                <a href="users.html" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Manajemen User</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="profile.html" class="nav-link">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Profil Saya</span>
+                </a>
+            </li>
+            <!-- Add other menu items based on role -->
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar-section">
+                    <img src="../../images/default-avatar.svg" alt="Profile avatar" class="profile-avatar" id="profileAvatar">
+                    <label class="avatar-upload-btn btn btn-secondary btn-small">
+                        <input type="file" id="avatarInput" accept="image/*">
+                        📷 Ganti Foto
+                    </label>
+                </div>
+                <div class="profile-info">
+                    <h2 class="profile-name" id="profileName">Loading...</h2>
+                    <span class="profile-role badge" id="profileRole">Loading...</span>
+                    <div class="profile-meta">
+                        <span>📧 <span id="profileEmail">Loading...</span></span>
+                        <span>📱 <span id="profilePhone">-</span></span>
+                        <span>📅 Bergabung: <span id="profileJoined">Loading...</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statLoginCount">0</div>
+                    <div class="stat-label">Total Login</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statLastLogin">-</div>
+                    <div class="stat-label">Login Terakhir</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statActiveDays">0</div>
+                    <div class="stat-label">Hari Aktif</div>
+                </div>
+                <div class="stat-card" id="elderlyCountCard" style="display: none;">
+                    <div class="stat-value" id="statElderlyCount">0</div>
+                    <div class="stat-label">Lansia Terhubung</div>
+                </div>
+            </div>
+
+            <!-- Profile Tabs -->
+            <div class="profile-tabs">
+                <button class="profile-tab active" data-tab="personal" onclick="switchTab('personal')">
+                    Informasi Pribadi
+                </button>
+                <button class="profile-tab" data-tab="security" onclick="switchTab('security')">
+                    Keamanan
+                </button>
+                <button class="profile-tab" data-tab="activity" onclick="switchTab('activity')">
+                    Aktivitas
+                </button>
+                <button class="profile-tab" data-tab="emergency" onclick="switchTab('emergency')" id="emergencyTab" style="display: none;">
+                    Kontak Darurat
+                </button>
+                <button class="profile-tab" data-tab="preferences" onclick="switchTab('preferences')">
+                    Preferensi
+                </button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-content">
+                <!-- Personal Information Tab -->
+                <div class="tab-pane active" id="personal-tab">
+                    <h3>Informasi Pribadi</h3>
+                    <form id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" id="username" class="form-input" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" class="form-input">
+                                <span class="error-message" id="email-error"></span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullName" class="form-label">Nama Lengkap</label>
+                                <input type="text" id="fullName" class="form-input">
+                                <span class="error-message" id="fullName-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="form-label">No. Telepon</label>
+                                <input type="tel" id="phone" class="form-input">
+                                <span class="error-message" id="phone-error"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="address" class="form-label">Alamat</label>
+                            <textarea id="address" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dateOfBirth" class="form-label">Tanggal Lahir</label>
+                                <input type="date" id="dateOfBirth" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="bloodType" class="form-label">Golongan Darah</label>
+                                <select id="bloodType" class="form-input">
+                                    <option value="">Pilih Golongan Darah</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="medicalInfoSection" style="display: none;">
+                            <label for="medicalConditions" class="form-label">Kondisi Medis</label>
+                            <textarea id="medicalConditions" class="form-input" rows="3" placeholder="Contoh: Hipertensi, Diabetes"></textarea>
+                        </div>
+                        <div class="form-group" id="allergiesSection" style="display: none;">
+                            <label for="allergies" class="form-label">Alergi</label>
+                            <textarea id="allergies" class="form-input" rows="2" placeholder="Contoh: Penisilin, Kacang"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Batal</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="tab-pane" id="security-tab">
+                    <h3>Keamanan Akun</h3>
+                    
+                    <!-- Change Password Section -->
+                    <div class="security-section">
+                        <div class="security-header">
+                            <h4>Ganti Password</h4>
+                        </div>
+                        <form id="passwordForm">
+                            <div class="form-group">
+                                <label for="currentPassword" class="form-label">Password Saat Ini</label>
+                                <input type="password" id="currentPassword" class="form-input">
+                                <span class="error-message" id="currentPassword-error"></span>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="newPassword" class="form-label">Password Baru</label>
+                                    <input type="password" id="newPassword" class="form-input">
+                                    <span class="error-message" id="newPassword-error"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword" class="form-label">Konfirmasi Password</label>
+                                    <input type="password" id="confirmPassword" class="form-input">
+                                    <span class="error-message" id="confirmPassword-error"></span>
+                                </div>
+                            </div>
+                            <div class="password-requirements">
+                                <p>Password harus memenuhi:</p>
+                                <ul>
+                                    <li id="length-req">Minimal 8 karakter</li>
+                                    <li id="uppercase-req">Minimal 1 huruf besar</li>
+                                    <li id="lowercase-req">Minimal 1 huruf kecil</li>
+                                    <li id="number-req">Minimal 1 angka</li>
+                                    <li id="special-req">Minimal 1 karakter spesial</li>
+                                </ul>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Ganti Password</button>
+                        </form>
+                    </div>
+
+                    <!-- Two-Factor Authentication -->
+                    <div class="security-section">
+                        <div class="security-header">
+                            <h4>Two-Factor Authentication</h4>
+                            <button class="btn btn-small" id="toggle2FA">Aktifkan</button>
+                        </div>
+                        <p>Tambahkan lapisan keamanan ekstra dengan mengaktifkan 2FA</p>
+                    </div>
+
+                    <!-- Active Sessions -->
+                    <div class="security-section">
+                        <div class="security-header">
+                            <h4>Sesi Aktif</h4>
+                            <button class="btn btn-small btn-secondary" onclick="refreshSessions()">Refresh</button>
+                        </div>
+                        <div class="session-list" id="sessionList">
+                            <p>Memuat sesi...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Tab -->
+                <div class="tab-pane" id="activity-tab">
+                    <h3>Aktivitas Terbaru</h3>
+                    <div class="activity-timeline" id="activityTimeline">
+                        <p>Memuat aktivitas...</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadMoreActivity()">Muat Lebih Banyak</button>
+                </div>
+
+                <!-- Emergency Contacts Tab (for elderly) -->
+                <div class="tab-pane" id="emergency-tab">
+                    <h3>Kontak Darurat</h3>
+                    <button class="btn btn-primary" onclick="addEmergencyContact()">+ Tambah Kontak</button>
+                    <div class="emergency-contacts-list" id="emergencyContactsList">
+                        <p>Memuat kontak darurat...</p>
+                    </div>
+                </div>
+
+                <!-- Preferences Tab -->
+                <div class="tab-pane" id="preferences-tab">
+                    <h3>Preferensi</h3>
+                    <form id="preferencesForm">
+                        <div class="security-section">
+                            <h4>Notifikasi</h4>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="emailNotifications">
+                                    Notifikasi Email
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="smsNotifications">
+                                    Notifikasi SMS
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="pushNotifications">
+                                    Notifikasi Push
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="security-section">
+                            <h4>Tampilan</h4>
+                            <div class="form-group">
+                                <label for="theme" class="form-label">Tema</label>
+                                <select id="theme" class="form-input">
+                                    <option value="light">Terang</option>
+                                    <option value="dark">Gelap</option>
+                                    <option value="auto">Otomatis</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="language" class="form-label">Bahasa</label>
+                                <select id="language" class="form-input">
+                                    <option value="id">Bahasa Indonesia</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Simpan Preferensi</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Emergency Contact Modal -->
+    <div id="emergencyContactModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Tambah Kontak Darurat</h3>
+                <button class="modal-close" onclick="closeModal('emergencyContactModal')">&times;</button>
+            </div>
+            <form id="emergencyContactForm" class="modal-body">
+                <div class="form-group">
+                    <label for="contactName" class="form-label">Nama</label>
+                    <input type="text" id="contactName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactPhone" class="form-label">No. Telepon</label>
+                    <input type="tel" id="contactPhone" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactRelationship" class="form-label">Hubungan</label>
+                    <input type="text" id="contactRelationship" class="form-input" placeholder="Contoh: Anak, Saudara">
+                </div>
+                <div class="form-group">
+                    <label for="contactPriority" class="form-label">Prioritas</label>
+                    <select id="contactPriority" class="form-input">
+                        <option value="1">1 (Utama)</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('emergencyContactModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2FA Setup Modal -->
+    <div id="twoFAModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Setup Two-Factor Authentication</h3>
+                <button class="modal-close" onclick="closeModal('twoFAModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Scan QR code berikut dengan aplikasi authenticator Anda:</p>
+                <div id="qrCode" style="text-align: center; margin: 20px 0;"></div>
+                <p>Atau masukkan kode manual:</p>
+                <input type="text" id="manualCode" class="form-input" readonly>
+                <div class="form-group">
+                    <label for="verificationCode" class="form-label">Kode Verifikasi</label>
+                    <input type="text" id="verificationCode" class="form-input" placeholder="Masukkan 6 digit kode">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('twoFAModal')">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="verify2FA()">Verifikasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display: none;">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/profile.js"></script>
+</body>
+</html>

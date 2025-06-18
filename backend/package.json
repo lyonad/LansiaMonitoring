@@ -1,4 +1,4 @@
- {
+{
   "name": "lansia-monitoring-backend",
   "version": "1.0.0",
   "description": "Backend API untuk Sistem Monitoring Kesehatan Lansia",
@@ -8,15 +8,17 @@
     "dev": "nodemon app.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "mysql2": "^3.6.0",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.0",
     "cors": "^2.8.5",
-    "multer": "^1.4.5-lts.1",
     "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "express-validator": "^7.0.1",
-    "node-cron": "^3.0.2"
+    "jsonwebtoken": "^9.0.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.0",
+    "node-cron": "^3.0.2",
+    "qrcode": "^1.5.3",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
